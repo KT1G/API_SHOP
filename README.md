@@ -1,6 +1,5 @@
 # API_SHOP
 
-
 TÍTULO
 
 Compraventa Tecnología Retro

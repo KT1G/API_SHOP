@@ -6,7 +6,8 @@ require('dotenv').config()
 // gonna connect to the database and start the server
 
 const { connect } = require('./app/db/db');
-const {listen} = require('./app/webserver/index');
+const { listen } = require('./app/webserver/index');
+const initDB = require("./app/db/initDB")
 
 const port = process.env.PORT;
 
@@ -22,6 +23,7 @@ process.on('unhandledRejection', (err) => {
 async function initApp() {
     try {
         await connect();
+        await initDB()
         await listen(port)
     
         console.log(`webserver listening at port ${port}`);

@@ -1,9 +1,9 @@
-'use strict';
+'use strict'
 
-const {getConnection} = require('./db')
+const { getConnection } = require('./db')
 
 async function initDB() {
-    let connection;
+    let connection
 
     try {
         connection = await getConnection()
@@ -12,12 +12,13 @@ async function initDB() {
         await connection.query(`DROP TABLE IF EXISTS products`)
         await connection.query(`DROP TABLE IF EXISTS bookings`)
 
-       /*  EJEMPLO POR GITHUB COPILOT await connection.query(`CREATE TABLE users (
+        await connection.query(`CREATE TABLE users (
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             email VARCHAR(255) NOT NULL,
+            code VARCHAR(255) NOT NULL,
             password VARCHAR(255) NOT NULL,
-            role VARCHAR(255) NOT NULL,
+            role VARCHAR(255)  NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         )`)
@@ -37,20 +38,18 @@ async function initDB() {
             product_id INT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        )`) */
+        )`)
 
         console.log('Database initialized')
-
     } catch (e) {
         console.error('Error connecting to database: ', e)
         throw e
-
     } finally {
         if (connection) {
             connection.release()
-            process.exit()
+            
         }
     }
 }
 
-initDB()
+module.exports = initDB

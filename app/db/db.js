@@ -1,7 +1,8 @@
 'use strict';
 
 
-const mysql = require('mysql2/promise'); 
+const mysql = require('mysql2/promise');
+
 
 const {
     MYSQL_HOST,
@@ -31,7 +32,7 @@ async function connect() {
     pool = mysql.createPool(options);
 
     try {
-        const connection = await pool.getConnection();
+        const connection = await pool.getConnection(); 
         connection.release();
     } catch (e) {
         console.error('mysql pool connect', e);

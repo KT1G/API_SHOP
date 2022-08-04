@@ -78,7 +78,7 @@ async function initDB() {
         console.log('Nuevas tablas creadas! 👌')
 
         //metemos datos de prueba
-        const FAKE_USERS = 10
+        const FAKE_USERS = 3
 
         for (let index = 0; index < FAKE_USERS; index++) {
             await connection.query(

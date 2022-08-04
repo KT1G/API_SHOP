@@ -27,7 +27,6 @@ const getTokenData = (token) => {
 
 
 module.exports = {
-    
     generateError,
     getToken,
     getTokenData,

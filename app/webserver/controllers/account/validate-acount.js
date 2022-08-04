@@ -1,24 +1,12 @@
 'use strict'
-const {
-    getTokenData
-} = require('../../../../helpers')
-const {
-    getConnection
-} = require('../../../db/db')
+const {getTokenData} = require('../../../../helpers')
+const {getConnection} = require('../../../db/db')
 
 
-
+// function para validar el usuario y la contraseña del usuario.
 async function validateAccount(req, res) {
 
     // validar los datos que nos llegan del webtoken (code y email)
-
-    // buscar en la base de datos el usuario que tenga el mismo email
-
-    // verificar codigo
-
-    // actualizar el status del usuario a active
-
-    // enviar respuesta de activacion de cuenta
 
     const authorization = req.headers.authorization
 
@@ -27,7 +15,8 @@ async function validateAccount(req, res) {
             message: "porfavor introduce el token en los headers"
         })
     }
-
+    
+    // verificar codigo
     const [prefix, token] = authorization.split(" ")
 
     if (prefix !== "Bearer" || !token) {
@@ -35,6 +24,8 @@ async function validateAccount(req, res) {
             message: " asegurate que esta bien introducido el token con el prefijo"
         })
     }
+
+    // buscar en la base de datos el usuario que tenga el mismo email
 
 
     let connection = null

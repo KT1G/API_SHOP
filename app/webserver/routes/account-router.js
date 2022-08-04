@@ -3,8 +3,8 @@
 const express = require("express");
 
 
-const createAccount = require("../controllers/account-controllers/create-account")
-const validateAccount = require("../controllers/account-controllers/validate-acount")
+const createAccount = require("../controllers/account/create-account")
+const validateAccount = require("../controllers/account/validate-acount")
 const router = express.Router()
 
 // create a new account

@@ -2,6 +2,7 @@
 
 require('dotenv').config()
 
+
 // this file is the entry point of the application 
 // gonna connect to the database and start the server
 
@@ -23,7 +24,7 @@ process.on('unhandledRejection', (err) => {
 async function initApp() {
     try {
         await connect();
-        await initDB()
+        // await initDB()
         await listen(port)
     
         console.log(`webserver listening at port ${port}`);

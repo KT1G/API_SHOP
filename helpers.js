@@ -1,6 +1,7 @@
 
 const jwt = require('jsonwebtoken')
 const authJwtSecret = process.env.AUTH_JWT_SECRET
+const jwtExpiresIn = +process.env.JWT_EXPIRES_IN
 
 
 const generateError = (message, status) => {
@@ -11,10 +12,13 @@ const generateError = (message, status) => {
 }
 
 const getToken = (payload) => {
-    return jwt.sign({
-        data: payload,
-
-    },authJwtSecret,{ expiresIn: 3600})
+    return jwt.sign(
+        {
+            data: payload,
+        },
+        authJwtSecret,
+        { expiresIn: jwtExpiresIn }
+    )
 }
 
 const getTokenData = (token) => {

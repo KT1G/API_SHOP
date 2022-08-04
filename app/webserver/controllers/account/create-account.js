@@ -37,9 +37,9 @@ async function sendEmail(userEmail,token) {
     }
     mg.messages().send(data, (error, body) => {
         if (error) {
-            console.error('error', error)
+             console.error('error', error)
         }
-        console.log(body)
+        return body
     })
 }
 
@@ -54,7 +54,6 @@ async function createAccount(req, res, next) {
     const accountData = { ...req.body }
     const now = new Date()
     const code = v4()
-    
     const payloadJwt = {
         email: accountData.email,
         code: code,
@@ -92,6 +91,8 @@ async function createAccount(req, res, next) {
 
         await sendEmail(accountData.email, token)
 
+
+
         res.status(201).send({
             message: "se ha enviado un correo para verificar cuenta"
         })
@@ -100,7 +101,7 @@ async function createAccount(req, res, next) {
         if (connection !== null) {
             connection.release()
         }
-        console.error(e)
+        console.error(e.message)
 
         if (e.code === 'ER_DUP_ENTRY') {
             return res.status(409).send({
@@ -108,6 +109,8 @@ async function createAccount(req, res, next) {
                 message: 'El usuario ya existe'
             })
         }
+
+        
         res.status(500).send()
     }
 }

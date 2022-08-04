@@ -78,7 +78,7 @@ async function initDB() {
         console.log('Nuevas tablas creadas! 👌')
 
         //metemos datos de prueba
-        const FAKE_USERS = 3
+        const FAKE_USERS = 5
 
         for (let index = 0; index < FAKE_USERS; index++) {
             await connection.query(
@@ -87,7 +87,7 @@ async function initDB() {
             )
         }
 
-        const FAKE_PRODUCTS = 100
+        const FAKE_PRODUCTS = 1
         for (let index = 0; index < FAKE_PRODUCTS; index++) {
             await connection.query(
                 `INSERT INTO products (name, image, caption, category, location, price, status, user_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?)`,

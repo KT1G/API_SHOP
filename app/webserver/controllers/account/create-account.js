@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt')
 const v4 = require('uuid').v4
 const mailgun = require('mailgun-js')
 
+// funcion validadora de los datos que nos llegan por la req.body
 async function validate(payload) {
     const schema = joi.object({
         email: joi.string().email().required(),
@@ -14,8 +15,11 @@ async function validate(payload) {
         password: joi.string().alphanum().min(3).max(30).required(),
     })
 
-    joi.assert(payload, schema)
+    joi
+    .assert(payload, schema)
 }
+
+// funcion para enviar correo al usuario para que se active su cuenta
 async function sendEmail(userEmail,token) {
     const mg = mailgun({
         apiKey: process.env.MAILGUN_API_KEY,
@@ -35,10 +39,12 @@ async function sendEmail(userEmail,token) {
         if (error) {
             console.error('error', error)
         }
-       
         console.log(body)
     })
 }
+
+
+// funcion para crear una cuenta de usuario en la base de datos
 
 async function createAccount(req, res, next) {
     // 1 - validar los datos que nos llegan por la req.body
@@ -48,12 +54,13 @@ async function createAccount(req, res, next) {
     const accountData = { ...req.body }
     const now = new Date()
     const code = v4()
+    
     const payloadJwt = {
         email: accountData.email,
         code: code,
     }
 
-    // validamos los datos que nos llegan del req.body y generamos un token
+    // validamos los datos que nos llegan del req.body 
     try {
         await validate(accountData)
     } catch (e) {

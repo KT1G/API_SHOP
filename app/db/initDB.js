@@ -39,7 +39,7 @@ async function initDB() {
                 id INT UNSIGNED NOT NULL AUTO_INCREMENT,
                 name VARCHAR(60) NOT NULL,
                 image CHAR(255) NOT NULL,
-                caption CHAR(255) NOT NULL,
+                caption CHAR(255)  NULL,
                 category VARCHAR(60) NOT NULL,
                 location VARCHAR(60) NOT NULL,
                 price INT NOT NULL,

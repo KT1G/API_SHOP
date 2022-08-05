@@ -5,8 +5,12 @@ const accountRouter = require('./routes/account-router')
 const bookingsRouter = require('./routes/bookings-router')
 const authRouter = require('./routes/auth-router')
 const productsRouter = require('./routes/products-router')
+const path = require('path')
 
 const app = express()
+
+app.use(express.static(path.join(process.cwd(),'public')))
+
 app.use(express.json())
 
 // rutas de la app

@@ -159,7 +159,7 @@ async function addNewProduct(req, res, next) {
 
 
         connection.release()
-        res.header('location', `${process.env.HTTP_SERVER_DOMAIN}/public/uploads/products/${userId}/${imageFileName}`)
+        res.header('location', `${process.env.HTTP_SERVER_DOMAIN}/uploads/products/${userId}/${imageFileName}`)
 
         return res.status(201).send({
             status: "Created",

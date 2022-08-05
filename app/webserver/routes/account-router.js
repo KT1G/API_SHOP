@@ -11,7 +11,7 @@ const router = express.Router()
 router.post('/accounts',createAccount)
 
 // endpoint:(put) /users/activate/ activate a user
-router.put('/accounts/confirm/',validateAccount)
+router.get('/accounts/confirm/:id',validateAccount)
 
 
 

@@ -1,8 +1,8 @@
 'use strict'
 
-const { getToken } = require('../../../../helpers')
+const {getToken} = require('../../../../helpers')
 const joi = require('joi')
-const { getConnection } = require('../../../db/db')
+const {getConnection} = require('../../../db/db')
 const bcrypt = require('bcrypt')
 const v4 = require('uuid').v4
 const mailgun = require('mailgun-js')
@@ -16,28 +16,26 @@ async function validate(payload) {
     })
 
     joi
-    .assert(payload, schema)
+        .assert(payload, schema)
 }
 
 // funcion para enviar correo al usuario para que se active su cuenta
-async function sendEmail(userEmail,token) {
+async function sendEmail(userEmail, token) {
     const mg = mailgun({
         apiKey: process.env.MAILGUN_API_KEY,
         domain: process.env.MAILGUN_DOMAIN,
     })
-
     const data = {
         from: 'BraianLuis@apishop.com',
         to: userEmail,
         subject: 'Bienvenido',
-
-        html: `<h2>copie el siguiente enlace en el postman para verificar la cuenta e introduce el token en los headers</h2>
-            <p> http://localhost:9000/api/accounts/confirm/</p>
-            <p> ${token}</p>`,
+        html: `<h2>copie el siguiente enlace en el postman para verificar o directamente en el navegador </h2>
+            <p> http://localhost:9000/api/accounts/confirm/${token}</p>
+             `,
     }
     mg.messages().send(data, (error, body) => {
         if (error) {
-             console.error('error', error)
+            console.error('error', error)
         }
         return body
     })
@@ -47,29 +45,35 @@ async function sendEmail(userEmail,token) {
 // funcion para crear una cuenta de usuario en la base de datos
 
 async function createAccount(req, res, next) {
-    // 1 - validar los datos que nos llegan por la req.body
-    // 2 - conectarnos a la base de datos y hacer la query para agregar un nuevo user si no existe
-    // 3 - enviar correo al usuario para que se active (webtoken con el email y el codigo de creacion de user)
+    /*
+     * 1. validar los datos que nos llegan por la req.body👌
+     * 2. Generar un token para la posterior activacion por correo👌
+     * 3. conectarnos a la base de datos y hacer la query para agregar un nuevo user si no existe👌
+     * 4. enviar correo al usuario para que se active (webtoken con el email y el codigo de creacion de user)👌
+     */
 
-    const accountData = { ...req.body }
-    const now = new Date()
-    const code = v4()
-    const payloadJwt = {
-        email: accountData.email,
-        code: code,
+    const accountData = {
+        ...req.body
     }
 
-    // validamos los datos que nos llegan del req.body 
+    // validamos los datos que nos llegan del req.body
     try {
         await validate(accountData)
     } catch (e) {
         return res.status(400).send({
             status: 'bad request',
-            message: 'Los datos introducidos no son correctos o falta algun campo por rellenar'
+            message: 'Los datos introducidos no son correctos o falta algun campo por rellenar',
         })
     }
 
-    // creamos los atribustos que nos faltan para generar un nuevo usuario
+    // creamos los atribustos que nos faltan para generar un nuevo usuario 
+    const now = new Date()
+    const code = v4()
+    // creamos los atribustos que nos faltan para generar un nuevo token
+    const payloadJwt = {
+        email: accountData.email,
+        code: code,
+    }
 
     // nos conectamos a MYSQL y realizamos el insert del user
     let connection = null
@@ -91,10 +95,8 @@ async function createAccount(req, res, next) {
 
         await sendEmail(accountData.email, token)
 
-
-
         res.status(201).send({
-            message: "se ha enviado un correo para verificar cuenta"
+            message: 'se ha enviado un correo para verificar cuenta',
         })
     } catch (e) {
         // en este catch nos aseguramos que no haya un usuario igual en la base de datos y liberamos la conexion por si no la liberamos en el try dado que hubo un error
@@ -106,11 +108,10 @@ async function createAccount(req, res, next) {
         if (e.code === 'ER_DUP_ENTRY') {
             return res.status(409).send({
                 status: 'ER_DUP_ENTRY',
-                message: 'El usuario ya existe'
+                message: 'El usuario ya existe',
             })
         }
 
-        
         res.status(500).send()
     }
 }

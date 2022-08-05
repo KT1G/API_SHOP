@@ -34,6 +34,7 @@ async function checkAccountSession(req, res, next) {
         req.claims = {
             userId: payload.data.userId,
             status: payload.data.status,
+            email : payload.data.email
         }
         
         

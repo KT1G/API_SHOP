@@ -10,7 +10,7 @@ const router = express.Router();
 
 
 // actualizar el usuario añadiendo biografia y imagen. 
-router.put('/users/profile',) /* NOTAS : ( middlewere para verificar que está logeado) (datos por = req.body) */
+//router.put('/users/profile', checkAccountSession, putUpdateUser) /* NOTAS : ( middlewere para verificar que está logeado) (datos por = req.body) */
 
 
 module.exports = router;

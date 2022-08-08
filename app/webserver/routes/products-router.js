@@ -6,10 +6,6 @@ const addNewProduct = require('../controllers/products/add-new-product-controlle
 const multer = require('multer')
 const buyProduct = require('../controllers/products/buy-product-controller')
 
-
-
-
-
 const upload = multer()
 
 const router = express.Router()
@@ -19,7 +15,15 @@ const router = express.Router()
 // endpoint:(get) /products/select?category=:category etc get products by querys
 
 // post a new product (only for users registered)
-router.post('/products', checkAccountSession, upload.single('image'), addNewProduct)
+router.post(
+    '/products',
+    checkAccountSession,
+    upload.single('image'),
+    addNewProduct
+)
 router.get('/products/:id/buy', checkAccountSession, buyProduct)
+//router.get('/products', getAllProductsController)
+// router.get('/products/:id', getProductByIdController)
+// router.get('/products/filter/:category', getProductsFilter)
 
 module.exports = router

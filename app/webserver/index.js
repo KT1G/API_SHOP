@@ -9,16 +9,19 @@ const path = require('path')
 
 const app = express()
 
-app.use(express.static(path.join(process.cwd(),'public')))
+app.use(express.static(path.join(process.cwd(), 'public')))
 
 app.use(express.json())
 
-// rutas de la app
+// RUTAS DE LA APP
 
 app.use('/api', accountRouter)
 app.use('/api', bookingsRouter)
 app.use('/api', authRouter)
 app.use('/api', productsRouter)
+
+const { getProductsController } = require('./controllers/products/search-products- controller')
+app.use('/api', getProductsController)
 
 // middlewer de error 404
 
@@ -32,8 +35,8 @@ app.use((req, res) => {
 app.use((error, req, res, next) => {
     console.error(error)
     res.status(error.httpStatus || 500).send({
-        status: "error",
-        message: error.message
+        status: 'error',
+        message: error.message,
     })
 })
 

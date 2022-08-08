@@ -13,7 +13,7 @@ const Joi = require('joi')
 const IMG_VALID_FORMATS = ['jpeg', "png"]
 const CATEGORY_VALID = ['pc', 'consolas', 'moviles']
 const MAX_IMAGE_WIDTH = 600
-const MAX_LIMIT_POST = 3
+const MAX_LIMIT_POST = 10
 
 const PROJECT_MAIN_FOLDER_PATH = process.cwd() // ruta de nuestro proyecto
 const IMG_FOLDER_PATH = path.join(PROJECT_MAIN_FOLDER_PATH, 'public', 'uploads', 'products')

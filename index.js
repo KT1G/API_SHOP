@@ -24,7 +24,7 @@ process.on('unhandledRejection', (err) => {
 async function initApp() {
     try {
         await connect();
-         //await initDB()
+        //await initDB()
         await listen(port)
     
         console.log(`webserver listening at port ${port}`);

@@ -115,7 +115,7 @@ async function buyProduct(req, res) {
         console.log(rows);
         res.send('ok')
     } catch (e) {
-    
+ 
         if (connection !== null) {
             connection.release()
         }

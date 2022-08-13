@@ -2,10 +2,11 @@
 
 const express = require('express')
 const accountRouter = require('./routes/account-router')
-const bookingsRouter = require('./routes/bookings-router')
 const authRouter = require('./routes/auth-router')
 const productsRouter = require('./routes/products-router')
 const path = require('path')
+const usersRouter = require('./routes/users-router')
+
 
 const app = express()
 
@@ -16,14 +17,11 @@ app.use(express.json())
 // RUTAS DE LA APP
 
 app.use('/api', accountRouter)
-app.use('/api', bookingsRouter)
 app.use('/api', authRouter)
 app.use('/api', productsRouter)
+app.use('/api', usersRouter)
 
-const { getProductsController } = require('./controllers/products/search-products- controller')
-app.use('/api', getProductsController)
 
-// middlewer de error 404
 
 app.use((req, res) => {
     res.status(404).send({
@@ -31,6 +29,9 @@ app.use((req, res) => {
         message: 'Not found',
     })
 })
+
+// middlewer de error 404
+
 
 app.use((error, req, res, next) => {
     console.error(error)

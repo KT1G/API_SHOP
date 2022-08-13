@@ -55,7 +55,7 @@ async function addNewProduct(req, res, next) {
         price: req.body.price,
         category: req.body.category,
         location: req.body.location,
-        caption: req.body.caption || null
+        caption: req.body.caption 
     }
 
     try {

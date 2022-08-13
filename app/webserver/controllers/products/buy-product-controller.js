@@ -1,10 +1,9 @@
 'use strict'
 
 const mailgun = require('mailgun-js')
-const {
-    getConnection
-} = require('../../../db/db')
+const {getConnection} = require('../../../db/db')
 const Joi = require('joi')
+const {getToken} = require('../../../../helpers')
 
 async function validateProduct(product) {
     const schema = Joi.object({
@@ -14,7 +13,7 @@ async function validateProduct(product) {
     Joi.assert(product, schema)
 }
 
-async function sendEmail({emailFrom, emailTo, product, idProduct}) {
+async function sendEmail({emailFrom, emailTo, product, idProduct, token}) {
     const mg = mailgun({
         apiKey: process.env.MAILGUN_API_KEY,
         domain: process.env.MAILGUN_DOMAIN,
@@ -27,7 +26,7 @@ async function sendEmail({emailFrom, emailTo, product, idProduct}) {
         html: `<h2>El usuario solicita la compra del siguiente producto</h2>
                 <p> ${JSON.stringify(product)} </p>
                 <h3>Acceda al siguiente enlace para aceptar la compra</h3>
-                <p> http://localhost:9000/api/products/${idProduct}/confirm?email=${emailFrom} </p>`,
+                <p> http://localhost:9000/api/products/${idProduct}/confirm?email=${token} </p>`,
     }
     mg.messages().send(data, (error, body) => {
         if (error) {
@@ -50,8 +49,12 @@ async function buyProduct(req, res) {
    
     const emailFrom = req.claims.email
 
-    
+    const payload = {
+        email: emailFrom,
+        idProduct: data.id,
+    }
 
+    
     try {
         await validateProduct(data)
     } catch (e) {
@@ -65,15 +68,17 @@ async function buyProduct(req, res) {
     let connection = null
     try {
         connection = await getConnection()
+        let token = await getToken(payload)
         const [rows] = await connection.query(`SELECT u.email , p.id AS productId, p.name AS productName , p.status AS productStatus
         FROM users u JOIN products p ON u.id = p.user_id
         WHERE p.id = ${data.id} `)
         connection.release()
+        console.log(rows[0]);
 
         // comprobamos que exista el producto
-        if (!rows) {
+        if (rows[0] === undefined) {
             res.status(400).send({
-                sucess: false,
+                sucess: "bad request",
                 message: 'el producto no existe',
             })
         }
@@ -106,16 +111,23 @@ async function buyProduct(req, res) {
                 name: userProduct.productName,
                 status: userProduct.productStatus
             },
-            idProduct: userProduct.productId
+            idProduct: userProduct.productId,
+            token: token,
         }
         console.log(response);
         sendEmail(response)
         
 
-        console.log(rows);
-        res.send('ok')
+        res.status(200).send({
+            status: 'ok',
+            message: 'La solicitud de compra ha sido enviada al vendedor',
+        })
+        
     } catch (e) {
- 
+        res.status(500).send({
+            status: 'error',
+            message: 'Error en el servidor',
+        })
         if (connection !== null) {
             connection.release()
         }

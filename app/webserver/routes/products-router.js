@@ -5,6 +5,7 @@ const checkAccountSession = require('../controllers/account/check-account.sesssi
 const addNewProduct = require('../controllers/products/add-new-product-controller')
 const multer = require('multer')
 const buyProduct = require('../controllers/products/buy-product-controller')
+const postConfirmBuyProduct = require('../controllers/products/confirm-buy-producto-controller')
 
 const upload = multer()
 
@@ -22,6 +23,7 @@ router.post(
     addNewProduct
 )
 router.get('/products/:id/buy', checkAccountSession, buyProduct)
+router.post('/products/:id/confirm', checkAccountSession, postConfirmBuyProduct)
 //router.get('/products', getAllProductsController)
 // router.get('/products/:id', getProductByIdController)
 // router.get('/products/filter/:category', getProductsFilter)

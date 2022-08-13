@@ -43,6 +43,7 @@ async function initDB() {
                 category VARCHAR(60) NOT NULL,
                 location VARCHAR(60) NOT NULL,
                 price INT NOT NULL,
+                valoration INT NULL,
                 status VARCHAR(60) NULL,
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 user_id INT UNSIGNED NOT NULL,
@@ -57,10 +58,11 @@ async function initDB() {
                 id INT UNSIGNED NOT NULL AUTO_INCREMENT,
                 product_id INT UNSIGNED NOT NULL,
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                delivery_address VARCHAR(255) NULL,
+                delivery_address VARCHAR(255)  NULL,
                 delivery_time DATETIME NULL ,
                 PRIMARY KEY (id),
                 FOREIGN KEY (product_id) REFERENCES products (id)
+                
             );
         `)
 
@@ -78,40 +80,39 @@ async function initDB() {
         console.log('Nuevas tablas creadas! 👌')
 
         //metemos datos de prueba
-        const FAKE_USERS = 5
+        /* const FAKE_USERS = 5
 
         for (let index = 0; index < FAKE_USERS; index++) {
             await connection.query(
                 `INSERT INTO users (name, email, password) VALUES(?, ?, ?)`,
                 [chance.name(), chance.email(), chance.string({ length: 60 })]
             )
-        }
+        } */
 
-        const FAKE_PRODUCTS = 1
-        for (let index = 0; index < FAKE_PRODUCTS; index++) {
-            await connection.query(
-                `INSERT INTO products (name, image, caption, category, location, price, status, user_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?)`,
-                [
-                    chance.name(),
-                    chance.string({ length: 255 }),
-                    chance.string({ length: 255 }),
-                    chance.string({ length: 60 }),
-                    chance.city(),
-                    chance.integer({ min: 0, max: 9999 }),
-                    chance.string({ length: 60 }),
-                    chance.integer({ min: 1, max: FAKE_USERS }),
-                ]
-            )
-        }
+        // const FAKE_PRODUCTS = 1
+        // for (let index = 0; index < FAKE_PRODUCTS; index++) {
+        //     await connection.query(
+        //         `INSERT INTO products (name, image, caption, category, location, price, user_id) VALUES(?, ?, ?, ?, ?, ?, ?, ?)`,
+        //         [
+        //             chance.name(),
+        //             chance.string({ length: 255 }),
+        //             chance.string({ length: 255 }),
+        //             chance.string({ length: 60 }),
+        //             chance.city(),
+        //             chance.integer({ min: 0, max: 9999 }),
+        //             chance.integer({ min: 1, max: FAKE_USERS }),
+        //         ]
+        //     )
+        // }
 
-        const FAKE_BOOKINGS = 30
+        /* const FAKE_BOOKINGS = 30
 
         for (let index = 0; index < FAKE_BOOKINGS; index++) {
             await connection.query(
                 `INSERT INTO bookings (product_id) VALUES(?)`,
                 [chance.integer({ min: 1, max: FAKE_PRODUCTS })]
             )
-        }
+        } */
 
         /* const FAKE_LIKES = 50
         for (let index = 0; index < FAKE_LIKES; index++) {

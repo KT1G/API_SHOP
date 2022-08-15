@@ -66,7 +66,7 @@ async function postConfirmBuyProduct(req, res,) {
     }
 
     const authorization = req.query.email
-    console.log(authorization);
+   
 
 
     if (!authorization) {
@@ -74,9 +74,20 @@ async function postConfirmBuyProduct(req, res,) {
             message: 'El email no se ha encontrado en la query',
         })
     }
-    const payload = await getTokenData(authorization)
+    let payload = null
 
-
+    try {
+        payload= await getTokenData(authorization) 
+        
+    }catch(error) {
+        return res.status(401).send({
+            status: "Unauthorized",
+            message: 'El token no es valido',
+        })
+    }
+    
+    
+    
     const data = {
         emailBuyer: payload.data.email,
         idProduct: req.params.id,
@@ -85,7 +96,7 @@ async function postConfirmBuyProduct(req, res,) {
     }
     const userId = req.claims.userId
     console.log("userId", userId);
-
+    
     // validamos los datos de la url que se nos envió por el correo
     try {
         await validateData(data)
@@ -141,12 +152,15 @@ async function postConfirmBuyProduct(req, res,) {
     // validamos que el producto este disponible para comprar
 
     const now = new Date()
+    const deliveryTime = new Date(data.deliveryTime)
     console.log("now", now);
-    console.log("data.deliveryTime", data.deliveryTime);
-    if (now > data.deliveryTime) {
+    console.log('data.deliveryTime', deliveryTime)
+
+    if (now.getTime() > deliveryTime.getTime()) {
         return res.status(400).send({
             status: 'Bad request',
-            message: 'La fecha de entrega no puede ser anterior a la fecha actual'
+            message:
+                'La fecha de entrega no puede ser anterior a la fecha actual',
         })
     }
 

@@ -87,7 +87,7 @@ async function buyProduct(req, res) {
         //comprobamos que el producto no este comprado
 
         if(userProduct.productStatus !== null){
-            res.status(403).send({
+            return res.status(403).send({
                 status: "Denied",
                 message: "Ese producto ya ha sido vendido"
             })

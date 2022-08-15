@@ -11,9 +11,9 @@ const Joi = require('joi')
 
 
 const IMG_VALID_FORMATS = ['jpeg', "png"]
-const CATEGORY_VALID = ['pc', 'consolas', 'moviles']
+const CATEGORY_VALID = ['desktop', 'notebook', 'tablet', 'smatphone', 'ebook', 'smartwhatch', 'console', 'tv', 'camera', 'mouse', 'keyboard', 'headset', 'speaker', 'printer', 'scanner', 'charger', ]
 const MAX_IMAGE_WIDTH = 600
-const MAX_LIMIT_POST = 10
+const MAX_LIMIT_POST = 50
 
 const PROJECT_MAIN_FOLDER_PATH = process.cwd() // ruta de nuestro proyecto
 const IMG_FOLDER_PATH = path.join(PROJECT_MAIN_FOLDER_PATH, 'public', 'uploads', 'products')
@@ -95,7 +95,7 @@ async function addNewProduct(req, res, next) {
         if (metadata.width > MAX_IMAGE_WIDTH) {
             image.resize(MAX_IMAGE_WIDTH)
         }
-        // para guardar la imagen generamos un nombre aleatorio para segurarnos que donde la guardemos solo haya 1 y solo 1 con el mismo nombre.
+        // para guardar la imagen generamos un nombre aleatorio para asegurarnos que donde la guardemos solo haya 1 y solo 1 con el mismo nombre.
 
         imageFileName = `${v4()}.${metadata.format}`
         const imageUploadPath = path.join(IMG_FOLDER_PATH, userId.toString())

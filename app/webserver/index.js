@@ -4,23 +4,21 @@ const express = require('express')
 const accountRouter = require('./routes/account-router')
 const authRouter = require('./routes/auth-router')
 const productsRouter = require('./routes/products-router')
+const usersRuoter = require('./routes/users-router')
 const path = require('path')
-const usersRouter = require('./routes/users-router')
-
 
 const app = express()
 
-app.use(express.static(path.join(process.cwd(), 'public')))
+app.use(express.static(path.join(process.cwd(), 'public')))// para que se pueda acceder a los archivos estaticos de la carpeta public
 
-app.use(express.json())
+app.use(express.json())// middleware para leer los datos en formato json de la req.body
 
 // RUTAS DE LA APP
 
 app.use('/api', accountRouter)
 app.use('/api', authRouter)
 app.use('/api', productsRouter)
-app.use('/api', usersRouter)
-
+app.use('/api', usersRuoter)
 
 
 app.use((req, res) => {

@@ -167,6 +167,7 @@ async function postConfirmBuyProduct(req, res,) {
     const booking = {
         product_id: data.idProduct,
         created_at: now,
+
         delivery_address: data.deliveryAddress,
         delivery_time: data.deliveryTime,
 
@@ -185,12 +186,18 @@ async function postConfirmBuyProduct(req, res,) {
         }
         connection.release()
 
+
         await connection.query('INSERT INTO bookings SET ?', booking)
-        await connection.query('UPDATE products SET status = "bought" WHERE id = ?', data.idProduct)
+        const [users] = await connection.query('SELECT id FROM users WHERE email = ?', data.emailBuyer)
+
+        // Cambiamos el status del producto a "bought" , e insertamos el id del usuario que ha comprado el producto.
+        const buyerId = users[0].id
+       
+        await connection.query('UPDATE products SET status = "bought",  buyer_id = ?  WHERE id = ?', [ buyerId, data.idProduct])
 
         res.status(200).send({
-            status: 'OK',
-            message: 'La venta se ha realizado correctamente'
+            status: 'success',
+            message: 'La venta se ha realizado correctamente, el comprador podra valorar al vendedor despues de la entrega del producto,',
         })
 
         const dataEmail = {

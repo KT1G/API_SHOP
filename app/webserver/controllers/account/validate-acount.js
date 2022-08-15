@@ -50,7 +50,10 @@ async function validateAccount(req, res) {
 
         // comprobamos que el codigo es el mismo
         if (user[0].code !== data.code) {
-            return res.status(401).send()
+            return res.status(401).send({
+                sucess: false,
+                message: 'el codigo no coincide',
+            })
         }
 
         // comprobamos que el usuario no este ya activado

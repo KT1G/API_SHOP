@@ -48,20 +48,21 @@ async function putScoreUsers(req, res) {
     }
 
     let connection
+ 
     try {
 
         connection = await getConnection()
         const [rows] = await connection.query('SELECT status, user_id, valoration FROM products WHERE id = ?', [data.productId])
-
-
+        
         // comprobamos que exista el producto
-
-        if (!rows) {
-            return res.status(400).send({
+        if (rows[0] === undefined) {
+            res.status(400).send({
                 status: "Bad Request",
                 message: "El producto no existe",
             })
         }
+        
+        
 
         // comprobamos que el producto ha sido comprado y que el status sea "bought" en la bbdd.
         const product = rows[0]
@@ -74,10 +75,10 @@ async function putScoreUsers(req, res) {
         
         // comprobamos que el usuario solo pueda valorar productos que no le pertenezcan 
 
-        if (product.user_id !== userData.id) {
+        if (product.user_id === userData.id) {
             return res.status(403).send({
                 status: "Forbidden",
-                message: "No puede puntuare a si mismo",
+                message: "No puede puntuarse a si mismo",
             })
         }
 
@@ -87,7 +88,7 @@ async function putScoreUsers(req, res) {
                 status: "Forbidden",
                 message: "El produto ya ha sido valorado",
             })
-        }
+        } 
         
     }catch (e) {
         console.log(e);
@@ -115,15 +116,19 @@ async function putScoreUsers(req, res) {
                 message: "El producto no ha sido vendido, no puede puntuar al usuario",
             })
         }
+
+        
         const date = new Date(booking.delivery_time)
-        if (now > date) {
+        console.log(now);
+        console.log(date);
+        if (now.getTime() < date.getTime()) {
             return res.status(403).send({
                 status: "forbidden",
                 message: "El producto no ha sido entregado, no puede puntuar al usuario",
             })
         }
         
-        res.send("hola desde funcion scoreUsers")
+       
         
     }catch (e) {
         console.log(e);
@@ -140,8 +145,28 @@ async function putScoreUsers(req, res) {
     // puntuar al usuario que ha vendido el producto.
     try {
         connection = await getConnection()
-        const [rows] = await connection.query('UPDATE products SET valoration = ? WHERE id = ?', [data.vote, userData.id])
+        await connection.query(
+            'UPDATE products SET valoration = ? WHERE id = ?',
+            [data.vote, data.productId]
+        )
+        // devolvemos la id del usuario para que se pueda recuperar su puntuacion
+        const [product] = await connection.query('SELECT user_id FROM products WHERE id = ?', [data.productId])
+        const userId = product[0].user_id
+        
+        // devolvemos la media de puntuaciones que tiene el usuario
+        const [rows] = await connection.query(`SELECT u.email, u.id AS UserId, AVG(p.valoration) AS MediaPuntuaciones
+        FROM users u LEFT JOIN products p
+        ON u.id = p.user_id
+        WHERE p.user_id = ? AND p.valoration IS NOT NULL`, [userId])
+        
         console.log(rows);
+
+
+        res.status(200).send({
+            status: 'OK',
+            message: 'Puntuacion realizada con exito',
+            data: rows[0],
+        })
     }
     catch (e) {
         console.log(e);

@@ -48,10 +48,12 @@ async function buyProduct(req, res) {
     }
    
     const emailFrom = req.claims.email
+    const idBuyer = req.claims.userId
 
     const payload = {
         email: emailFrom,
         idProduct: data.id,
+        idBuyer,
     }
 
     
@@ -77,7 +79,7 @@ async function buyProduct(req, res) {
 
         // comprobamos que exista el producto
         if (rows[0] === undefined) {
-            res.status(400).send({
+            return res.status(400).send({
                 sucess: "bad request",
                 message: 'el producto no existe',
             })
@@ -95,7 +97,7 @@ async function buyProduct(req, res) {
 
         // comprobamos que los correos no sean iguales
         if (userProduct.email === emailFrom) {
-            res.status(403).send({
+            return res.status(403).send({
                 status: "Denied",
                 message: "No puedes comprar un producto que es tuyo"
             })
@@ -119,8 +121,8 @@ async function buyProduct(req, res) {
         
 
         res.status(200).send({
-            status: 'ok',
-            message: 'La solicitud de compra ha sido enviada al vendedor',
+            status: 'success',
+            message: `La solicitud de compra ha sido enviada al vendedor ${userProduct.email} correctamente, ha espera de confirmación de compra`,
         })
         
     } catch (e) {

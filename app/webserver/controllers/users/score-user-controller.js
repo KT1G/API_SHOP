@@ -83,12 +83,12 @@ async function putScoreUsers(req, res) {
         }
 
         // comprobamos que el prodcuto haya sido valorado una vez por usuario
-        if(product.valoration !== null){
+          if(product.valoration !== null){
             return res.status(403).send({
                 status: "Forbidden",
                 message: "El produto ya ha sido valorado",
             })
-        } 
+        }  
         
     }catch (e) {
         console.log(e);
@@ -121,12 +121,12 @@ async function putScoreUsers(req, res) {
         const date = new Date(booking.delivery_time)
         console.log(now);
         console.log(date);
-        if (now.getTime() < date.getTime()) {
+         if (now.getTime() < date.getTime()) {
             return res.status(403).send({
                 status: "forbidden",
                 message: "El producto no ha sido entregado, no puede puntuar al usuario",
             })
-        }
+        }  
         
        
         
@@ -160,6 +160,14 @@ async function putScoreUsers(req, res) {
         WHERE p.user_id = ? AND p.valoration IS NOT NULL`, [userId])
         
         console.log(rows);
+
+        const media = rows[0].MediaPuntuaciones
+        console.log(rows[0].MediaPuntuaciones);
+
+        await connection.query(`UPDATE users SET score = ? WHERE id = ?`, [
+            media,
+            userId,
+        ])
 
 
         res.status(200).send({

@@ -26,6 +26,7 @@ async function initDB() {
                 password CHAR(60) NOT NULL,
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 code VARCHAR(255) NULL,
+                score decimal(5,4) NULL DEFAULT 0,
                 status VARCHAR(60) NULL,
                 avatar VARCHAR(255) NULL,
                 bio VARCHAR(255) NULL,
@@ -41,9 +42,8 @@ async function initDB() {
                 category VARCHAR(60) NOT NULL,
                 location VARCHAR(60) NOT NULL,
                 price INT NOT NULL,
-
                 valoration INT NULL,
-
+                buyer_id INT NULL,
                 image VARCHAR(255) NOT NULL,
                 caption VARCHAR(255)  NULL,
                 status VARCHAR(60) NULL,
@@ -59,8 +59,6 @@ async function initDB() {
             CREATE TABLE bookings (
                 id INT UNSIGNED NOT NULL AUTO_INCREMENT,
                 product_id INT UNSIGNED NOT NULL,
-                product_name VARCHAR(60) NOT NULL,
-                product_price INT NOT NULL,
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 delivery_address VARCHAR(255)  NULL,
                 delivery_time DATETIME NULL ,
@@ -82,8 +80,9 @@ async function initDB() {
 
         console.log('Nuevas tablas creadas! 👌')
 
+
         //metemos datos de prueba
-        const FAKE_USERS = 20
+    /*     const FAKE_USERS = 20
 
         for (let index = 0; index < FAKE_USERS; index++) {
             await connection.query(
@@ -174,7 +173,7 @@ async function initDB() {
                     user_id,
                 ]
             )
-        }
+        } */
 
         /* const FAKE_BOOKINGS = 30
 
@@ -196,6 +195,8 @@ async function initDB() {
                 [chance.integer({ min: 1, max: FAKE_PRODUCTS })]
             )
         }*/
+
+        
 
         console.log('Datos de prueba insertados! 🤠')
 

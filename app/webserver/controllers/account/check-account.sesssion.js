@@ -11,7 +11,7 @@ async function checkAccountSession(req, res, next) {
     // si no hay token, devolvemos un error 400
     if (!authorization) {
         return res.status(401).send({
-            status: " Anauthorized",
+            status: " Unauthorized",
             message: "Porfavor introduce el token en los headers para acceder a esta ruta"
         })
     }
@@ -21,7 +21,7 @@ async function checkAccountSession(req, res, next) {
     // si el prefix no es Bearer, devolvemos un error 400
     if(prefix !== "Bearer" || !token) {
         return res.status(401).send({
-            status: " Anauthorized",
+            status: " Unauthorized",
             message: "Porfavor introduce el token correctamente en los headers para acceder a esta ruta"
         })
     }

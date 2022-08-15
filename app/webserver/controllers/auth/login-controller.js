@@ -65,7 +65,7 @@ async function login(req, res) {
         // comprobamos que exita el usuario
         if (rows.length !== 1) {
             res.status(401).send({
-                status: "Anauthorized",
+                status: "Unauthorized",
                 message: "Esa cuenta no esta registrada o los datos no son correctos"
             })
         }
@@ -74,17 +74,19 @@ async function login(req, res) {
         const isPasswordOk = await bcrypt.compare(accountData.password, user.password)
         if (!isPasswordOk) {
             res.status(401).send({
-                status: 'Anauthorized',
+                status: 'Unauthorized',
                 message: 'Esa cuenta no esta registrada o la contraseña no son correctos',
             })
         }
 
         // comprobamos que la cuenta esta activada
+        //comprobar que el status es null	
 
-        if (user.status !== "active") {
+
+        if (user.status === null) {
             res.status(401).send({
-                status: 'Anauthorized',
-                message: 'Debe activar la cuenta para logearse, revise su correo y compruebe la carpeta de SPAM'
+                status: 'Unauthorized',
+                message: 'Debe activar la cuenta o ser administrador para logearse, revise su correo y compruebe la carpeta de SPAM'
             })
         }
 

@@ -69,6 +69,7 @@ async function createAccount(req, res, next) {
     // creamos los atribustos que nos faltan para generar un nuevo usuario 
     const now = new Date()
     const code = v4()
+    
     // creamos los atribustos que nos faltan para generar un nuevo token
     const payloadJwt = {
         email: accountData.email,
@@ -89,10 +90,12 @@ async function createAccount(req, res, next) {
             code: code,
             created_at: now,
         }
+        // insertamos el user en la base de datos
 
         await connection.query(`INSERT INTO users SET ?`, user)
         connection.release()
 
+        // enviamos el correo al usuario para que se active su cuenta
         await sendEmail(accountData.email, token)
 
         res.status(201).send({

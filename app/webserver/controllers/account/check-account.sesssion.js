@@ -37,7 +37,6 @@ async function checkAccountSession(req, res, next) {
             email : payload.data.email
         }
         
-        
         return next()
         
     }

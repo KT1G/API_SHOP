@@ -30,10 +30,12 @@ async function validateAccount(req, res) {
         connection = await getConnection()
         const payload = await getTokenData(authorization)
 
+        // recuperamos del payload el email del usuario y el code
         const data = {
             email: payload.data.email,
             code: payload.data.code,
         }
+        // buscamos el usuario en la base de datos
 
         const [user] = await connection.query(
             'SELECT id, email, code, status FROM users WHERE email = ?',

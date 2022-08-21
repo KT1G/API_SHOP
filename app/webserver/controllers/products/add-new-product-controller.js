@@ -13,7 +13,7 @@ const Joi = require('joi')
 const IMG_VALID_FORMATS = ['jpeg', "png"]
 const CATEGORY_VALID = ['desktop', 'notebook', 'tablet', 'smatphone', 'ebook', 'smartwhatch', 'console', 'tv', 'camera', 'mouse', 'keyboard', 'headset', 'speaker', 'printer', 'scanner', 'charger', ]
 const MAX_IMAGE_WIDTH = 600
-const MAX_LIMIT_POST = 50
+const MAX_LIMIT_POST = 10
 
 const PROJECT_MAIN_FOLDER_PATH = process.cwd() // ruta de nuestro proyecto
 const IMG_FOLDER_PATH = path.join(PROJECT_MAIN_FOLDER_PATH, 'public', 'uploads', 'products')
@@ -40,7 +40,7 @@ async function addNewProduct(req, res, next) {
     /*  
      * 1. Validar los datos tanto de la imagen como de las carecteristicas del producto 👌
      * 2. Crear y guardar si no exite la imagen en un disco duro en este caso el pc 👌
-     * 3. hacer una query para limitar el numero de publicaciones por usuario a 3
+     * 3. hacer una query para limitar el numero de publicaciones por usuario👌
      * 4. hacer la query a la bbdd e insertar el producto 👌
      * 5. Enviarle a front la ruta completa de la imagen 👌
      */
@@ -139,6 +139,7 @@ async function addNewProduct(req, res, next) {
 
 
     try {
+        // insertamos el producto en la bbdd
         const now = new Date()
 
         const product = {
@@ -155,8 +156,6 @@ async function addNewProduct(req, res, next) {
         connection = await getConnection()
 
         await connection.query(`INSERT INTO products SET ?`, product)
-
-
 
         connection.release()
         res.header('location', `${process.env.HTTP_SERVER_DOMAIN}/uploads/products/${userId}/${imageFileName}`)

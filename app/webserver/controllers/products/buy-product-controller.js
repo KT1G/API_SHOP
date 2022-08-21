@@ -48,12 +48,11 @@ async function buyProduct(req, res) {
     }
    
     const emailFrom = req.claims.email
-    const idBuyer = req.claims.userId
+    
 
     const payload = {
         email: emailFrom,
-        idProduct: data.id,
-        idBuyer,
+        idProduct: data.id,   
     }
 
     
@@ -69,6 +68,7 @@ async function buyProduct(req, res) {
 
     let connection = null
     try {
+        // conectarnos a la base de datos y hacer la query para obtener el producto
         connection = await getConnection()
         let token = await getToken(payload)
         const [rows] = await connection.query(`SELECT u.email , p.id AS productId, p.name AS productName , p.status AS productStatus

@@ -152,14 +152,22 @@ async function putScoreUsers(req, res) {
         // devolvemos la id del usuario para que se pueda recuperar su puntuacion
         const [product] = await connection.query('SELECT user_id FROM products WHERE id = ?', [data.productId])
         const userId = product[0].user_id
+
+
         
         // devolvemos la media de puntuaciones que tiene el usuario
         const [rows] = await connection.query(`SELECT u.email, u.id AS UserId, AVG(p.valoration) AS MediaPuntuaciones
         FROM users u LEFT JOIN products p
         ON u.id = p.user_id
         WHERE p.user_id = ? AND p.valoration IS NOT NULL`, [userId])
+
+        if (rows[0] === undefined) {
+            return res.status(404).send({
+                status: "Not Found",
+                message: "No hay puntuaciones para el usuario",
+            })
+        }
         
-        console.log(rows);
 
         const media = rows[0].MediaPuntuaciones
         console.log(rows[0].MediaPuntuaciones);
@@ -168,7 +176,6 @@ async function putScoreUsers(req, res) {
             media,
             userId,
         ])
-
 
         res.status(200).send({
             status: 'OK',

@@ -1,57 +1,21 @@
-# API_SHOP
+# COMPRAVENTA TECNOLOGÍA RETRO
 
-TÍTULO
+## FUNCIONAMIENTO DE LA API.
 
-Compraventa Tecnología Retro
+Los requisitos de la API se encuentran en el archivo "
 
-DESCRIPCIÓN:
+#### Iniciar la APP:
 
-Catálogo de compraventa de artículos retro (consolas, PCs, etc). Quien busca algo accede, selecciona lo
-que le interesa y solicita la compra al precio publicado.
+1. Instalar los node_modules con el comando **"npm install"**.
+2. Crear el archivo ***.env* ** y rellenar los datos basándonos en el archivo ***.env.example***. IMPORTANTE! Los datos de mailgun deben ser importados tal cual estan en el archivo ***.env.example*.**
+3. En el archivo ***.index* ** principal de la app en la linea 28 se encuentran 1 función para la creación de la DDBB, para su uso debemos descomentarla antes de arrancar la aplicación. IMPORATANTE! Para evitar que la DDBB se sobrescriba con cada guardado es necesario comentar de nuevo la función.
+4. Iniciar la app con el comando **"npm run dev"**.
 
-USUARIO ANÓNIMOS
+#### Uso de las DDBB:
 
-Búsqueda por:
+- La función *"initDB"* crea la DDBB con las distintas tablas necesarias para su uso, así como una serie de usuarios y productos para que se puedan hacer búsquedas más complejas entre otras funciones. Para vuestra comodidad dejamos activos los siguientes emails que ya están registrados en mailgun.
 
-- Nombre
-- Categoría
-- Localidad
-- Precio
+> "habfakerbuyer@yopmail.com" y "habfakerseller@yopmail.com"
+y otros 3 de reserva "habfakeruser-example@yopmail.com" =&gt; IMPORTANTE! Sustituir la palabra example por un número entre 1-3.
 
-Login y Registro (le llega email con código de confirmación para activar la cuenta antes de poder hacer
-login)
-
-- Email
-- Nombre
-- Password
-
-USUARIOS REGISTRADOS 
-(pueden comprar y vender artículos)
-
-Gestión del perfil (cambio de datos del registro con posibilidad de añadir biografía y foto de
-perfil)
-
-Búsqueda por:
-- Nombre
-- Categoría
-- Localidad
-- Precio
-
-Publicación de nuevos artículos:
-
-- Nombre
-- Imagen
-- Descripción
-- Categoría
-- Precio
-- Localidad de venta
-
-Proceso de reserva de artículos:
-
-- El vendedor recibe la propuesta de compra vía email y puede aceptarla y proponer una
-hora y lugar de entrega.
-
-- El comprador recibe información sobre si la compra fue aceptada vía email con la
-información de hora y lugar de entrega.
-
-- El comprador puede valorar al vendedor sólo después de la entrega.
+A continuación se detallan los diferentes endpoints, tanto su funcionamiento como las diferentes validaciones.

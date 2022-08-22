@@ -3,7 +3,7 @@
 //Para la creacion de un squema y poder validar los datos que recibimos
 const Joi = require('joi')
 
-//Necesitamos conectar con la BBDD
+//Necesitamos conectar con la DDBB
 const { getConnection } = require('../../../db/db.js')
 
 //Importar del archivo de la ruta ../helpers.js la Variable que uso para la Gestion de Errores

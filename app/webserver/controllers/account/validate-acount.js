@@ -1,27 +1,25 @@
 'use strict'
-const {getTokenData} = require('../../../../helpers')
-const {getConnection} = require('../../../db/db')
-
+const { getTokenData } = require('../../../../helpers')
+const { getConnection } = require('../../../db/db')
 
 // function para validar el usuario y la contraseña del usuario.
 async function validateAccount(req, res) {
     /*
      * 1. Verificar que nos llegé el token por los headers👌
      * 2. Verificar que la estructura del token sea la correcta👌
-     * 3. Query a la bbdd para buscar el usuario al que pertenezca el email que nos llega por el token👌
+     * 3. Query a la DDBB para buscar el usuario al que pertenezca el email que nos llega por el token👌
      * 4. hacer validaciones (existe el usuario, el codigo coincide , el estatus no esta active)👌
      * 5. Cambiar el estatus a active 👌
      */
 
     const authorization = req.params.id
-    console.log(authorization);
+    console.log(authorization)
 
     if (!authorization) {
         return res.status(400).send({
             message: 'porfavor introduce el token en los headers',
         })
     }
-
 
     // buscar en la base de datos el usuario que tenga el mismo email
 

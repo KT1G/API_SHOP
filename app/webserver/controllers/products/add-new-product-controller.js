@@ -4,44 +4,61 @@ const fs = require('fs/promises')
 const path = require('path')
 const sharp = require('sharp')
 const v4 = require('uuid').v4
-const {getConnection} = require('../../../db/db')
+const { getConnection } = require('../../../db/db')
 const Joi = require('joi')
 
-
-
-
-const IMG_VALID_FORMATS = ['jpeg', "png"]
-const CATEGORY_VALID = ['desktop', 'notebook', 'tablet', 'smatphone', 'ebook', 'smartwhatch', 'console', 'tv', 'camera', 'mouse', 'keyboard', 'headset', 'speaker', 'printer', 'scanner', 'charger', ]
+const IMG_VALID_FORMATS = ['jpeg', 'png']
+const CATEGORY_VALID = [
+    'desktop',
+    'notebook',
+    'tablet',
+    'smatphone',
+    'ebook',
+    'smartwhatch',
+    'console',
+    'tv',
+    'camera',
+    'mouse',
+    'keyboard',
+    'headset',
+    'speaker',
+    'printer',
+    'scanner',
+    'charger',
+]
 const MAX_IMAGE_WIDTH = 600
 const MAX_LIMIT_POST = 10
 
 const PROJECT_MAIN_FOLDER_PATH = process.cwd() // ruta de nuestro proyecto
-const IMG_FOLDER_PATH = path.join(PROJECT_MAIN_FOLDER_PATH, 'public', 'uploads', 'products')
+const IMG_FOLDER_PATH = path.join(
+    PROJECT_MAIN_FOLDER_PATH,
+    'public',
+    'uploads',
+    'products'
+)
 
 // funcion para validar los datos que nos llegan por la req.body
 async function validateProduct(product) {
     const schema = Joi.object({
         name: Joi.string().required(),
-        category: Joi.string().valid(...CATEGORY_VALID).required(),
+        category: Joi.string()
+            .valid(...CATEGORY_VALID)
+            .required(),
         price: Joi.number().required(),
         location: Joi.string().required(),
-        caption: Joi.string()
-
+        caption: Joi.string(),
     })
 
     Joi.assert(product, schema)
-
-
 }
 
 // funcion para crear un producto en la base de datos
 async function addNewProduct(req, res, next) {
-
-    /*  
+    /*
      * 1. Validar los datos tanto de la imagen como de las carecteristicas del producto 👌
      * 2. Crear y guardar si no exite la imagen en un disco duro en este caso el pc 👌
      * 3. hacer una query para limitar el numero de publicaciones por usuario👌
-     * 4. hacer la query a la bbdd e insertar el producto 👌
+     * 4. hacer la query a la DDBB e insertar el producto 👌
      * 5. Enviarle a front la ruta completa de la imagen 👌
      */
 
@@ -55,7 +72,7 @@ async function addNewProduct(req, res, next) {
         price: req.body.price,
         category: req.body.category,
         location: req.body.location,
-        caption: req.body.caption 
+        caption: req.body.caption,
     }
 
     try {
@@ -69,20 +86,17 @@ async function addNewProduct(req, res, next) {
     // Comprobamos que se haya enviado una imagen del producto
     if (!file || !file.buffer) {
         return res.status(400).send({
-            status: "Bad request",
-            message: "debes introducir una imagen del producto"
+            status: 'Bad request',
+            message: 'debes introducir una imagen del producto',
         })
     }
 
     let imageFileName = null
     let connection = null
     try {
-
         // validamos el formato de la img para que no se metan archivos que no sean jpeg o png
         const image = sharp(file.buffer)
         const metadata = await image.metadata()
-
-
 
         if (!IMG_VALID_FORMATS.includes(metadata.format)) {
             return res.status(400).send({
@@ -111,9 +125,7 @@ async function addNewProduct(req, res, next) {
         if (!rows) {
             connection.release()
         }
-        const {
-            publicaciones
-        } = rows[0] || 0
+        const { publicaciones } = rows[0] || 0
         if (publicaciones >= MAX_LIMIT_POST) {
             return res.status(403).send({
                 status: 'Denied',
@@ -125,11 +137,9 @@ async function addNewProduct(req, res, next) {
 
         // la ruta total seria =  dir_principal/public/uploads/products/$userId
         await fs.mkdir(imageUploadPath, {
-            recursive: true
+            recursive: true,
         })
         await image.toFile(path.join(imageUploadPath, imageFileName))
-
-
     } catch (e) {
         if (connection !== null) {
             connection.release()
@@ -137,9 +147,8 @@ async function addNewProduct(req, res, next) {
         res.status(500).send(e.message)
     }
 
-
     try {
-        // insertamos el producto en la bbdd
+        // insertamos el producto en la DDBB
         const now = new Date()
 
         const product = {
@@ -150,32 +159,29 @@ async function addNewProduct(req, res, next) {
             category: dataProduct.category,
             price: dataProduct.price,
             location: dataProduct.location,
-            caption: dataProduct.caption
-
+            caption: dataProduct.caption,
         }
         connection = await getConnection()
 
         await connection.query(`INSERT INTO products SET ?`, product)
 
         connection.release()
-        res.header('location', `${process.env.HTTP_SERVER_DOMAIN}/uploads/products/${userId}/${imageFileName}`)
+        res.header(
+            'location',
+            `${process.env.HTTP_SERVER_DOMAIN}/uploads/products/${userId}/${imageFileName}`
+        )
 
         return res.status(201).send({
-            status: "Created",
-            message: "El producto ha sido añadido con exito"
+            status: 'Created',
+            message: 'El producto ha sido añadido con exito',
         })
-
     } catch (e) {
         if (connection !== null) {
             connection.release()
         }
         console.log(e)
         return res.status(500).send(e.message)
-
     }
-
-
 }
-
 
 module.exports = addNewProduct

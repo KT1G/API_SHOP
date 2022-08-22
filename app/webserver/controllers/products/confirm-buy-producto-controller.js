@@ -1,14 +1,9 @@
 'use strict'
 
-const {
-    getConnection
-} = require('../../../db/db')
+const { getConnection } = require('../../../db/db')
 const joi = require('joi').extend(require('@joi/date'))
-const {
-    getTokenData
-} = require('../../../../helpers')
+const { getTokenData } = require('../../../../helpers')
 const mailgun = require('mailgun-js')
-
 
 async function validateData(payload) {
     const schema = joi.object({
@@ -21,13 +16,12 @@ async function validateData(payload) {
     joi.assert(payload, schema)
 }
 
-
 async function sendEmail({
     emailFrom,
     emailTo,
     deliveryAddress,
     deliveryTime,
-    productId
+    productId,
 }) {
     const mg = mailgun({
         apiKey: process.env.MAILGUN_API_KEY,
@@ -51,23 +45,20 @@ async function sendEmail({
     })
 }
 
-async function postConfirmBuyProduct(req, res,) {
+async function postConfirmBuyProduct(req, res) {
     /*
      * 1. Validar los datos que nos llegan de los params y del body.👌
      * 2. Comprobar que la persona que esta logeada es la misma que a la que le pertenece el producto a vender. 👌
-     * 3. Hacer la consulta a la bbdd e insertar una nueva reserva para ese producto. 👌
+     * 3. Hacer la consulta a la DDBB e insertar una nueva reserva para ese producto. 👌
      * 4. Cambiar el status del producto. 👌
      * 5. Enviar el correo al comprador indicando hora y lugar de entrega
      */
-    
 
     const dataBody = {
-        ...req.body
+        ...req.body,
     }
 
     const authorization = req.query.email
-   
-
 
     if (!authorization) {
         return res.status(400).send({
@@ -77,17 +68,14 @@ async function postConfirmBuyProduct(req, res,) {
     let payload = null
 
     try {
-        payload= await getTokenData(authorization) 
-        
-    }catch(error) {
+        payload = await getTokenData(authorization)
+    } catch (error) {
         return res.status(401).send({
-            status: "Unauthorized",
+            status: 'Unauthorized',
             message: 'El token no es valido',
         })
     }
-    
-    
-    
+
     const data = {
         emailBuyer: payload.data.email,
         idProduct: req.params.id,
@@ -95,21 +83,19 @@ async function postConfirmBuyProduct(req, res,) {
         deliveryAddress: dataBody.deliveryAddress,
     }
     const userId = req.claims.userId
-    console.log("userId", userId);
-    
+    console.log('userId', userId)
+
     // validamos los datos de la url que se nos envió por el correo
     try {
         await validateData(data)
-
     } catch (e) {
         console.error(e)
         return res.status(400).send({
-            status: "Bad request",
-            message: "Los datos introducidos no son correctos recuerde que el formato de la fecha es YYYY-MM-DD HH:mm"
+            status: 'Bad request',
+            message:
+                'Los datos introducidos no son correctos recuerde que el formato de la fecha es YYYY-MM-DD HH:mm',
         })
     }
-
-
 
     // Validamos que el usuario registrado sea el correcto comprobando la ID de las claims con la del propietario del producto.
     let connection
@@ -119,8 +105,7 @@ async function postConfirmBuyProduct(req, res,) {
         const [rows] = await connection.query(`SELECT u.email, p.user_id 
                                                 FROM users u 
                                                 JOIN products p  ON u.id = p.user_id  WHERE p.id = ${data.idProduct} `)
-        const userIdProduct = rows[0];
-            
+        const userIdProduct = rows[0]
 
         sellerEmail = rows[0].email
 
@@ -130,17 +115,13 @@ async function postConfirmBuyProduct(req, res,) {
             })
         }
 
-            
-
         if (userIdProduct.user_id !== userId) {
             return res.status(403).send({
                 status: 'Anauthorized',
-                message: 'No tiene permisos para acceder a esta ruta debe ser el propietario del producto'
+                message:
+                    'No tiene permisos para acceder a esta ruta debe ser el propietario del producto',
             })
-                
         }
-
-
     } catch (e) {
         console.error(e.message)
         return res.status(500).send()
@@ -148,12 +129,11 @@ async function postConfirmBuyProduct(req, res,) {
         connection.release()
     }
 
-
     // validamos que el producto este disponible para comprar
 
     const now = new Date()
     const deliveryTime = new Date(data.deliveryTime)
-    console.log("now", now);
+    console.log('now', now)
     console.log('data.deliveryTime', deliveryTime)
 
     if (now.getTime() > deliveryTime.getTime()) {
@@ -170,34 +150,42 @@ async function postConfirmBuyProduct(req, res,) {
 
         delivery_address: data.deliveryAddress,
         delivery_time: data.deliveryTime,
-
     }
 
-    // Validamos que el producto no tenga una reserva, insertamos la reserva en la bbdd y cambiamos el status del producto a "bought" e insertamos el correo de la persona que ha comprado el producto.
+    // Validamos que el producto no tenga una reserva, insertamos la reserva en la DDBB y cambiamos el status del producto a "bought" e insertamos el correo de la persona que ha comprado el producto.
     try {
         connection = await getConnection()
-        const [rows] = await connection.query('SELECT * FROM bookings WHERE product_id = ?', data.idProduct)
+        const [rows] = await connection.query(
+            'SELECT * FROM bookings WHERE product_id = ?',
+            data.idProduct
+        )
 
         if (rows.length > 0) {
             return res.status(409).send({
                 status: 'Conflict',
-                message: `El producto ya ha sido vendido a ${data.emailBuyer} `
+                message: `El producto ya ha sido vendido a ${data.emailBuyer} `,
             })
         }
         connection.release()
 
-
         await connection.query('INSERT INTO bookings SET ?', booking)
-        const [users] = await connection.query('SELECT id FROM users WHERE email = ?', data.emailBuyer)
+        const [users] = await connection.query(
+            'SELECT id FROM users WHERE email = ?',
+            data.emailBuyer
+        )
 
         // Cambiamos el status del producto a "bought" , e insertamos el id del usuario que ha comprado el producto.
         const buyerId = users[0].id
-       
-        await connection.query('UPDATE products SET status = "bought",  buyer_id = ?  WHERE id = ?', [ buyerId, data.idProduct])
+
+        await connection.query(
+            'UPDATE products SET status = "bought",  buyer_id = ?  WHERE id = ?',
+            [buyerId, data.idProduct]
+        )
 
         res.status(200).send({
             status: 'success',
-            message: 'La venta se ha realizado correctamente, el comprador podra valorar al vendedor despues de la entrega del producto,',
+            message:
+                'La venta se ha realizado correctamente, el comprador podra valorar al vendedor despues de la entrega del producto,',
         })
 
         const dataEmail = {
@@ -209,8 +197,6 @@ async function postConfirmBuyProduct(req, res,) {
         }
 
         await sendEmail(dataEmail)
-
-
     } catch (e) {
         console.error(e.message)
         res.status(500).send()
@@ -218,6 +204,5 @@ async function postConfirmBuyProduct(req, res,) {
         connection.release()
     }
 }
-
 
 module.exports = postConfirmBuyProduct

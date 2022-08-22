@@ -6,14 +6,19 @@ const fs = require('fs/promises') //Crear el directorio y subir la imagen
 const sharp = require('sharp') //Validar el formato de la imagen
 const path = require('path') //Crear una ruta
 
-const { getConnection } = require('../../../db/db.js') //Necesitamos conectar con la BBDD
+const { getConnection } = require('../../../db/db.js') //Necesitamos conectar con la DDBB
 //const { generateError } = require('../../../../helpers') //Variable que uso para la Gestion de Errores
 
 // Limites y Ruta para actualizar los datos del usuario pudiendo modificar el nombre y la posibilidad de añadir biografia y avatar.
 const IMG_VALID_FORMATS = ['jpeg', 'png']
 const MAX_IMAGE_WIDTH = 600
 const PROJECT_MAIN_FOLDER_PATH = process.cwd() // ruta de nuestro proyecto
-const IMG_FOLDER_PATH = path.join(PROJECT_MAIN_FOLDER_PATH, 'public', 'uploads', 'users')
+const IMG_FOLDER_PATH = path.join(
+    PROJECT_MAIN_FOLDER_PATH,
+    'public',
+    'uploads',
+    'users'
+)
 
 // funcion validadora de los datos que nos llegan por la req.body
 async function validateNewInfoUser(info) {
@@ -31,7 +36,7 @@ const putUpdateUserController = async (req, res, next) => {
      * 1. Guardar los datos recibidos por la req.body en un objeto👌
      * 2. Validar los datos: name, bio e image 👌
      * 3. Crear y guardar si no exite la imagen en un disco duro en este caso el pc 👌
-     * 4. hacer la query a la bbdd e insertar el usuario 👌
+     * 4. hacer la query a la DDBB e insertar el usuario 👌
      * 5. Enviarle a front la ruta completa de la imagen 👌
      */
 
@@ -79,7 +84,8 @@ const putUpdateUserController = async (req, res, next) => {
             console.log('entro')
             res.status(400).send({
                 status: 'bad request',
-                message: 'No se recibieron datos para actualizar el usuario con id: ${userId}',
+                message:
+                    'No se recibieron datos para actualizar el usuario con id: ${userId}',
             })
         }
 
@@ -104,7 +110,7 @@ const putUpdateUserController = async (req, res, next) => {
             query = `${query} ${conditions.join(', ')} WHERE id = ${userId}`
         }
 
-        //Enviar la query a la bbdd
+        //Enviar la query a la DDBB
         const [result] = await connection.query(query)
         if (result.affectedRows === 0) {
             res.status(400).send({
@@ -113,7 +119,7 @@ const putUpdateUserController = async (req, res, next) => {
             })
         }
         // la ruta total seria =  dir_principal/public/uploads/users/$userId
-        if(file){
+        if (file) {
             await fs.mkdir(imageUploadPath, { recursive: true })
             await image.toFile(path.join(imageUploadPath, imageFileName))
         }

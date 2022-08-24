@@ -126,13 +126,13 @@ async function addNewProduct(req, res, next) {
             connection.release()
         }
         const { publicaciones } = rows[0] || 0
-        if (publicaciones >= MAX_LIMIT_POST) {
+         if (publicaciones >= MAX_LIMIT_POST) {
             return res.status(403).send({
                 status: 'Denied',
                 message: `El limite de publicaciones por usuario son ${MAX_LIMIT_POST}`,
             })
         }
-
+ 
         connection.release()
 
         // la ruta total seria =  dir_principal/public/uploads/products/$userId
@@ -164,6 +164,11 @@ async function addNewProduct(req, res, next) {
         connection = await getConnection()
 
         await connection.query(`INSERT INTO products SET ?`, product)
+        const [row] = await connection.query(`SELECT id FROM products ORDER BY created_at DESC LIMIT 1`)
+        
+        const idNewProduct = row[0].id
+        
+        
 
         connection.release()
         res.header(
@@ -173,7 +178,7 @@ async function addNewProduct(req, res, next) {
 
         return res.status(201).send({
             status: 'Created',
-            message: 'El producto ha sido añadido con exito',
+            message: `El producto con la id ${idNewProduct} ha sido añadido con exito`,
         })
     } catch (e) {
         if (connection !== null) {

@@ -34,4 +34,4 @@ async function initApp() {
     }
 }
 
-initApp();
+initApp(); 

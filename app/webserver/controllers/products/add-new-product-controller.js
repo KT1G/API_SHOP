@@ -126,12 +126,12 @@ async function addNewProduct(req, res, next) {
             connection.release()
         }
         const { publicaciones } = rows[0] || 0
-         if (publicaciones >= MAX_LIMIT_POST) {
+          if (publicaciones >= MAX_LIMIT_POST) {
             return res.status(403).send({
                 status: 'Denied',
                 message: `El limite de publicaciones por usuario son ${MAX_LIMIT_POST}`,
             })
-        }
+        } 
  
         connection.release()
 

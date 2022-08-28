@@ -103,8 +103,8 @@ Para la activación de la cuenta debemos copiar el link que se nos envía y pega
 
 En este endpoint comprobamos y permitimos que un usuario se logue en la APP. Para ello debemos insertar por el body con el formato **raw** un objeto tipo **JSON** con los siguientes parámetros.
 
-- ****email**:"habfakerBraian@yopmail.com"
-- password**: "mypassword"
+- **email**:"habfakerBraian@yopmail.com"
+- **password**: "mypassword"
 
 Si el usuario se loguea con este, se le devolverá por la respuesta un objeto con un token de acceso, el cual le permitirá permanecer conectado por un determinado periodo de tiempo.
 

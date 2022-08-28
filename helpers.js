@@ -1,14 +1,12 @@
-
+const Joi = require('joi')
 const jwt = require('jsonwebtoken')
 const authJwtSecret = process.env.AUTH_JWT_SECRET
 const jwtExpiresIn = +process.env.JWT_EXPIRES_IN
 
-
 const generateError = (message, status) => {
-    const error = new error(message)
+    const error = new Error(message)
     error.httpStatus = status
     return error
-
 }
 
 const getToken = (payload) => {
@@ -22,17 +20,157 @@ const getToken = (payload) => {
 }
 
 const getTokenData = (token) => {
-    
     return jwt.verify(token, authJwtSecret)
-
 }
 
+async function validateProducts(payload) {
+    const schema = Joi.object({
+        id: Joi.number().integer().positive().min(1),
+        category: Joi.string().max(60).pattern(/^[a-zA-Z\u00C0-\u017F]+$/),
+        name: Joi.string().max(60),
+        location: Joi.string().max(60).pattern(/^[a-zA-Z\u00C0-\u017F]+$/),
+        user_id: Joi.number().integer().positive().min(1),
+        price: Joi.number().positive().min(0).max(3500),
+        minPrice: Joi.number().integer().positive().min(0),
+        maxPrice: Joi.number().integer().positive().max(3500),
+        likes: Joi.number().integer().positive().min(0),
+        minLikes: Joi.number().integer().positive().min(0),
+        maxLikes: Joi.number().integer().positive().min(1),
+        score: Joi.number().positive().min(0).max(5),
+        minScore: Joi.number().positive().min(0),
+        maxScore: Joi.number().positive().max(5),
+        valoration: Joi.number().integer().positive().min(0).max(5),
+        minValoration: Joi.number().integer().positive().min(0),
+        maxValoration: Joi.number().integer().positive().max(5),
+        buyer_id: Joi.number().integer().positive(),
+        status: Joi.string().max(60).valid('bought'),
+        caption: Joi.string().max(60),
+        page: Joi.number().integer().positive().min(1),
+    })
 
-
-
-module.exports = {
-    generateError,
-    getToken,
-    getTokenData,
+    Joi.assert(payload, schema)
 }
 
+async function validateLikes(payload) {
+    const schema = Joi.object({
+        id: Joi.number().integer().positive().min(1),
+        product_id: Joi.number().integer().positive().min(1),
+        user_id: Joi.number().integer().positive().min(1),
+        lover_id: Joi.number().integer().positive().min(1),
+        page: Joi.number().integer().positive().min(1),
+    })
+
+    Joi.assert(payload, schema)
+}
+
+async function createProductFilter(data, query, conditions, queryStrings) {
+    const { category, name, location, user_id, price, minPrice, maxPrice, likes, minLikes, maxLikes, score, minScore, maxScore, valoration, minValoration, maxValoration, buyer_id, } = data
+    
+    if (category || name || location || user_id || price || minPrice || maxPrice || likes || minLikes || maxLikes || score || minScore || maxScore || valoration || minValoration || maxValoration || buyer_id) {
+        if (category) {
+            conditions.push(`category = '${category}'`)
+            queryStrings.push(`category=${category}`)
+        }
+        if (name) {
+            conditions.push(`name = '${name}'`)
+            queryStrings.push(`name=${name}`)
+        }
+        if (location) {
+            conditions.push(`location = '${location}'`)
+            queryStrings.push(`location=${location}`)
+        }
+        if (user_id) {
+            conditions.push(`user_id = '${user_id}'`)
+            queryStrings.push(`user_id=${user_id}`)
+        }
+        if (price) {
+            conditions.push(`price = '${price}'`)
+            queryStrings.push(`price=${price}`)
+        }
+        if (minPrice) {
+            conditions.push(`price >= '${minPrice}'`)
+            queryStrings.push(`minPrice=${minPrice}`)
+        }
+        if (maxPrice) {
+            conditions.push(`price <= '${maxPrice}'`)
+            queryStrings.push(`maxPrice=${maxPrice}`)
+        }
+        if (likes) {
+            conditions.push(`likes = '${likes}'`)
+            queryStrings.push(`likes=${likes}`)
+        }
+        if (minLikes) {
+            conditions.push(`likes >= '${minLikes}'`)
+            queryStrings.push(`minLikes=${minLikes}`)
+        }
+        if (maxLikes) {
+            conditions.push(`likes <= '${maxLikes}'`)
+            queryStrings.push(`maxLikes=${maxLikes}`)
+        }
+        if (score) {
+            conditions.push(`score = '${score}'`)
+            queryStrings.push(`score=${score}`)
+        }
+        if (minScore) {
+            conditions.push(`score >= '${minScore}'`)
+            queryStrings.push(`minScore=${minScore}`)
+        }
+        if (maxScore) {
+            conditions.push(`score <= '${maxScore}'`)
+            queryStrings.push(`maxScore=${maxScore}`)
+        }
+        if (valoration) {
+            conditions.push(`valoration = '${valoration}'`)
+            queryStrings.push(`valoration=${valoration}`)
+        }
+        if (minValoration) {
+            conditions.push(`valoration >= '${minValoration}'`)
+            queryStrings.push(`minValoration=${minValoration}`)
+        }
+        if (maxValoration) {
+            conditions.push(`valoration <= '${maxValoration}'`)
+            queryStrings.push(`maxValoration=${maxValoration}`)
+        }
+        if (buyer_id) {
+            conditions.push(`buyer_id = '${buyer_id}'`)
+            queryStrings.push(`buyer_id=${buyer_id}`)
+        }
+        query = `${query} AND ${conditions.join(' AND ')}`
+    } 
+    
+    return { query, conditions, queryStrings }
+}
+
+async function pagination(urlBase, page, totalPages, totalObject, offset, object, queryStrings) {
+    if (queryStrings.length > 0) {
+        const prevPage = page > 1 ? `${urlBase}?page=${page - 1}&${queryStrings.join('&')}` : null
+        const currentPage = `${urlBase}?page=${page}&${queryStrings.join('&')}`
+        const nextPage = page < totalPages ? `${urlBase}?page=${page + 1}&${queryStrings.join('&')}` : null
+        const firstPage = `${urlBase}?page=1&${queryStrings.join('&')}`
+        const lastPage = `${urlBase}?page=${totalPages}&${queryStrings.join('&')}`
+        const pageView = `Pagina: ${page} de ${totalPages}`
+        const productsView = `Productos: ${offset + 1} al ${offset + object.length}, de ${totalObject}`
+        //Objeto info con los datos de la pagina
+        const info = { prevPage, currentPage, nextPage, firstPage, lastPage, totalObject, totalPages, pageView, productsView }
+        const result = { info, object }
+
+        //Si todo va bien. Devolvemos los productos y la info de la paginación
+        return result
+    } else {
+        const prevPage = page > 1 ? `${urlBase}?page=${page - 1}` : null
+        const currentPage = `${urlBase}?page=${page}`
+        const nextPage = page < totalPages ? `${urlBase}?page=${page + 1}` : null
+        const firstPage = `${urlBase}?page=1`
+        const lastPage = `${urlBase}?page=${totalPages}`
+        const pageView = `Pagina: ${page} de ${totalPages}`
+        const productsView = `Productos: ${offset + 1} al ${offset + object.length}, de ${totalObject}`
+        //objeto info con los datos de la pagina
+        const info = { prevPage, currentPage, nextPage, firstPage, lastPage, totalObject, totalPages, pageView, productsView }
+        const result = { info, object }
+
+        //Si todo va bien. Devolvemos los products y la info de la paginación
+        return result
+    }
+}
+
+module.exports = { generateError, getToken, getTokenData, validateProducts, validateLikes, createProductFilter, pagination }

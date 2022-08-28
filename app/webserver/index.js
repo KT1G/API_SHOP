@@ -5,6 +5,7 @@ const accountRouter = require('./routes/account-router')
 const authRouter = require('./routes/auth-router')
 const productsRouter = require('./routes/products-router')
 const usersRuoter = require('./routes/users-router')
+const likesRouter = require('./routes/likes-router')
 const path = require('path')
 
 const app = express()
@@ -19,6 +20,7 @@ app.use('/api', accountRouter)
 app.use('/api', authRouter)
 app.use('/api', productsRouter)
 app.use('/api', usersRuoter)
+app.use('/api', likesRouter)
 
 
 app.use((req, res) => {

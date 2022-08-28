@@ -7,25 +7,9 @@ const v4 = require('uuid').v4
 const { getConnection } = require('../../../db/db')
 const Joi = require('joi')
 
-const IMG_VALID_FORMATS = ['jpeg', 'png']
-const CATEGORY_VALID = [
-    'desktop',
-    'notebook',
-    'tablet',
-    'smatphone',
-    'ebook',
-    'smartwhatch',
-    'console',
-    'tv',
-    'camera',
-    'mouse',
-    'keyboard',
-    'headset',
-    'speaker',
-    'printer',
-    'scanner',
-    'charger',
-]
+const IMG_VALID_FORMATS = ['jpeg', "png"]
+const CATEGORY_VALID = ['desktop', 'notebook', 'tablet', 'smartphone', 'ebook', 'smartwhatch', 'console', 'tv', 'camera', 'mouse', 'keyboard', 'headset', 'speaker', 'printer', 'scanner', 'charger', ]
+
 const MAX_IMAGE_WIDTH = 600
 const MAX_LIMIT_POST = 10
 
@@ -57,7 +41,11 @@ async function addNewProduct(req, res, next) {
     /*
      * 1. Validar los datos tanto de la imagen como de las carecteristicas del producto 👌
      * 2. Crear y guardar si no exite la imagen en un disco duro en este caso el pc 👌
+<<<<<<< Updated upstream
      * 3. hacer una query para limitar el numero de publicaciones por usuario👌
+=======
+     * 3. hacer una query para limitar el numero de publicaciones por usuario a 3
+>>>>>>> Stashed changes
      * 4. hacer la query a la DDBB e insertar el producto 👌
      * 5. Enviarle a front la ruta completa de la imagen 👌
      */

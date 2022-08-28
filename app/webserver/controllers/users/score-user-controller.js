@@ -13,15 +13,15 @@ async function validate(payload) {
 }
 
 async function putScoreUsers(req, res) {
-    /*
-     * 1 . Validar datos que nos llegan por los params, en concreto el (id) 👌
-     * 2 . Comprobar que el producto ha sido comprado y que el status sea "bought" en la DDBB. 👌
-     * 3.  Otras validaciones: que el usuario solo pueda valorar productos que no le pertenezcan y solo pueda valorar una vez por producto 👌
-     * 4 . Comprobar que el producto ha sido entregado mirando la hora de entrega y la hora actual. 👌
-     * 5 . Puntuar al usuario que ha vendido el producto.
-     * 6 . Devolver la media de puntuaciones que tiene el usuario.
-     */
-
+  /*
+    * 1 . Validar datos que nos llegan por los params, en concreto el (id) 👌
+    * 2 . Comprobar que el producto ha sido comprado y que el status sea "bought" en la DDBB. 👌
+    * 3.  Otras validaciones: que el usuario solo pueda valorar productos que no le pertenezcan y solo pueda valorar una vez por producto 👌
+    * 4 . Comprobar que el producto ha sido entregado mirando la hora de entrega y la hora actual. 👌
+    * 5 . Puntuar al usuario que ha vendido el producto.
+    * 6 . Devolver la media de puntuaciones que tiene el usuario.
+  */
+    
     const data = {
         productId: req.params.id,
         vote: req.query.vote,
@@ -43,7 +43,8 @@ async function putScoreUsers(req, res) {
         })
     }
 
-    let connection
+
+    let connection = null
 
     try {
         connection = await getConnection()

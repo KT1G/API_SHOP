@@ -1,38 +1,69 @@
 'use strict'
 
-//Para la creacion de un squema y poder validar los datos que recibimos
-const Joi = require('joi')
-
 //Necesitamos conectar con la DDBB
 const { getConnection } = require('../../../db/db.js')
 
 //Importar del archivo de la ruta ../helpers.js la Variable que uso para la Gestion de Errores
-const { generateError } = require('../../../../helpers')
+const { generateError, validateProducts, pagination, createProductFilter, } = require('../../../../helpers')
+
+const MAX_PRODUCTS_PER_PAGE = 10
+
+/***************************************************************
+ ****************************ALL********************************
+ **************************************************************/
 
 const getAllProducts = async (req, res, next) => {
-    let connection
+    let connection = null
+
+    //DATOS DE LA PETICION
+
+    //PARA LA PAGINACION
+    const page = parseInt(req.query.page, 10) || 1 //Pagina recibida por querystring o por defecto 1
+    const offset = (page - 1) * MAX_PRODUCTS_PER_PAGE //Registros que se saltaran
+
+    //VALIDACIONES
+    try {
+        await validateProducts({ page })
+    } catch (error) {
+        return res.status(400).send({
+            status: 'Bad Request',
+            message: error.details[0].message,
+        })
+    }
+
+    //OBTENER LOS ELEMENTOS DE LA BASE DE DATOS
     try {
         //Creamos la conexion a la base de datos
         connection = await getConnection()
+        let queryStrings = []
+
+        let [totalProducts] = await connection.query(
+            `SELECT COUNT(*) AS total FROM products WHERE status IS NULL`
+        )
+        totalProducts = totalProducts[0].total
+        console.log(totalProducts);
+        const totalPages = Math.ceil(totalProducts / MAX_PRODUCTS_PER_PAGE)
 
         //Cojo todos los products de la base de datos
         const [allProducts] = await connection.query(
-            `SELECT * FROM products p WHERE p.status IS NULL`
+            `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
         )
 
         //si no existe ningun product devuelve un error
         if (allProducts.length === 0) {
-            return res.status(404).send({
-                status: 'not found',
-                message: 'No existen productos',
-            })
+            throw generateError(`Not Found. No existen productos`, 404)
+        } else if (page > totalPages) {
+            throw generateError(
+                `Not Found. No existe la pagina ${page}, Van del 1 al ${totalPages}`,
+                404
+            )
+        } else {
+            const urlBase = `http://${req.headers.host}/api/products`
+            return res.status(200).send(await pagination(
+                urlBase, page, totalPages, totalProducts, offset, allProducts, queryStrings
+                )
+            )
         }
-
-        //imprime el tamaño del array de products
-        console.log(allProducts.length)
-
-        //Devuelve un array con todos los products
-        res.status(200).send(allProducts)
     } catch (error) {
         next(error) //Si llega aqui el error se envia al Middleware de gestion de errores
     } finally {
@@ -42,47 +73,120 @@ const getAllProducts = async (req, res, next) => {
     }
 }
 
-async function validateId(payload) {
-    const schema = Joi.object({
-        id: Joi.number().required(),
-    })
-
-    Joi.assert(payload, schema)
-}
+/***************************************************************
+ ***************************BY ID*******************************
+ **************************************************************/
 
 const getProductById = async (req, res, next) => {
-    let connection
-    const data = { id: req.params.id }
+    let connection = null
+
+    //DATOS DE LA PETICION
+    const data = `${req.params.id}`
+    console.log(data)
+    let dataArray = null
+
+    //PARA LA PAGINACION
+    const page = parseInt(req.query.page, 10) || 1 //Pagina recibida por querystring o por defecto 1
+    const offset = (page - 1) * MAX_PRODUCTS_PER_PAGE //Registros que se saltaran
+
+    //VALIDACIONES
     try {
-        await validateId(data)
-    } catch (e) {
-        return res.status(400).send({
-            status: 'bad request',
-            message:
-                'Los datos introducidos no son correctos debe ser un numero entero',
+        if (data.includes('-')) {
+            //lo separo por '-'
+            dataArray = data.split('-')
+            //validar que cada dato cumpla con validateProducts
+            await Promise.all(
+                dataArray.map(async (id) => {
+                    await validateProducts({ id })
+                })
+            )
+            await validateProducts({ page })
+            console.log('Datos validados')
+        } else {
+            const object = { id: data, page: req.query.page }
+            await validateProducts(object)
+            console.log('Datos validados')
+        }
+    } catch (error) {
+        res.status(400).send({
+            status: 'Bad Request',
+            message: error.details[0].message,
         })
     }
 
+    //OBTENER LOS ELEMENTOS DE LA BASE DE DATOS
     try {
         connection = await getConnection()
+        //Coger el id mas grande de la base de datos
+        const [maxId] = await connection.query(`SELECT MAX(id) AS maxId FROM products`)
+        let queryStrings = []
 
-        //Selecciono el producto por su id
-        const [product] = await connection.query(
-            `SELECT * FROM products WHERE status IS NULL AND  id = ${req.params.id}`
-        )
+        if (dataArray) {
+            let notExist = []
+            const totalProducts = dataArray.length
+            const totalPages = Math.ceil(totalProducts / MAX_PRODUCTS_PER_PAGE)
+            //Map de dataArray para coger los ids y comprobar que existan en la base de datos, si no existen los añado a un array para devolver un error
+            await Promise.all(
+                dataArray.map(async (id) => {
+                    const [product] = await connection.query(
+                        `SELECT id FROM products WHERE status IS NULL AND id = ${id}`
+                    )
+                    if (product.length === 0) {
+                        notExist.push(id)
+                    }
+                })
+            )
+            
+            if (notExist.length > 0) {
+                notExist = notExist.join(', ')
+                throw generateError(
+                    `Not Found. No existe, se borró o se compró el/los producto/s con id: ${notExist}; debe estar entre 1 y ${maxId[0].maxId}`,
+                    404
+                )
+            } else if (page > totalPages) {
+                throw generateError(
+                    `Not Found. No existe la pagina ${page}, van del 1 al ${totalPages}`,
+                    404
+                )
+            } else {
+                const dataString = dataArray.join(', ')
+                //hacer la busqueda de los productos por id
+                const [products] = await connection.query(
+                    `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.id IN (${dataString}) LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
+                )
 
-        //si no existe el product devuelve un error
-        if (product.length === 0) {
-            res.status(404).send({
-                status: 'not found',
-                message: 'El producto no existe',
-            })
+                const urlBase = `http://${req.headers.host}/api/products/filterBy/id/${data}`
+                return res.status(200).send(
+                    await pagination(urlBase,page,totalPages,totalProducts,offset,products,queryStrings
+                    )
+                )
+            }
+        } else {
+            const totalProducts = 1
+            const totalPages = Math.ceil(totalProducts / MAX_PRODUCTS_PER_PAGE)
+            const [product] = await connection.query(
+                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.id = '${data}' LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
+            )
+            if (product.length === 0) {
+                throw generateError(
+                    `Not Found. No existe, se borró o se compró el producto con id: ${data}, debe estar entre 1 y ${maxId[0].maxId}`,
+                    404
+                )
+            } else if (page > totalPages) {
+                throw generateError(
+                    `Not Found. No existe la pagina ${page}, van del 1 al ${totalPages}`,
+                    404
+                )
+            } else {
+                const urlBase = `http://${req.headers.host}/api/products/filterBy/id/${data}`
+            return res.status(200).send(await pagination(
+                urlBase, page, totalPages, totalProducts, offset, product, queryStrings
+                )
+            )
+            }
         }
-
-        //Devuelve un array con todos los products
-        res.status(200).send(product)
     } catch (error) {
-        next(error) //Si llega aqui el error se envia al Middleware de gestion de errores
+        next(error)
     } finally {
         if (connection) {
             connection.release() //Liberamos la conexion
@@ -90,88 +194,88 @@ const getProductById = async (req, res, next) => {
     }
 }
 
-async function validateFilterByCategory(payload) {
-    const schema = Joi.object({
-        category: Joi.string().max(60).required(),
-        name: Joi.string().max(60),
-        location: Joi.string().max(60),
-        price: Joi.number().min(0).max(3500).integer(),
-        minPrice: Joi.number().min(0).integer(),
-        maxPrice: Joi.number().max(3500).integer(),
-        user_id: Joi.number(),
-    })
-
-    Joi.assert(payload, schema)
-}
+/***************************************************************
+ ************************BY CATEGORY****************************
+ **************************************************************/
 
 const getProductByCategory = async (req, res, next) => {
-    let connection
-    const payload = { category: req.params.category } //payload es un objeto con los params de la url
-    req.claims = { ...req.query } //req.claims es un objeto con los datos de la consulta de la url
-    const data = { ...payload, ...req.claims }
+    let connection = null
 
-    //Validamos los datos que recibimos
+    //DATOS DE LA PETICION
+    const category = req.params.category
+    req.claims = { ...req.query } //req.claims es un objeto con los datos de la consulta de la url
+    const data = { ...req.claims }
+
+    //PARA LA PAGINACION
+    const page = parseInt(req.query.page, 10) || 1 //Pagina recibida por querystring o por defecto 1
+    const offset = (page - 1) * MAX_PRODUCTS_PER_PAGE //Registros que se saltaran
+
+    //VALIDACIONES
     try {
-        await validateFilterByCategory(data)
-    } catch (e) {
+        await validateProducts({ ...data, category })
+        console.log('datos validados')
+    } catch (error) {
         return res.status(400).send({
             status: 'bad request',
-            message: 'Los datos introducidos no son correctos',
+            message: error.details[0].message,
         })
     }
 
-    //Hacemos la consulta a la base de datos
+    //OBTENER LOS ELEMENTOS DE LA BASE DE DATOS
     try {
         connection = await getConnection()
+        let conditions = []
+        let queryStrings = []
+        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.category = '${category}'`
 
-        const { category, name, location, price, minPrice, maxPrice, user_id } =
-            data
-        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, u.name AS user_name  FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  category = '${category}'`
+        //Meter en query, conditions y queryStrings los elementos del objeto que devuelve la funcion createProductFilter
+        const result = await createProductFilter(data,query,queryStrings,conditions)
+        query = result.query
+        queryStrings = result.queryStrings
+        conditions = result.conditions
 
-        if (name || location || price || minPrice || maxPrice || user_id) {
-            const conditions = []
-            if (name) {
-                conditions.push(`name = "${name}"`)
-            }
-            if (location) {
-                conditions.push(`location = "${location}"`)
-            }
-            if (user_id) {
-                conditions.push(`user_id = ${user_id}`)
-            }
-            if (price) {
-                conditions.push(`price = ${price}`)
-            }
-            if (minPrice || maxPrice) {
-                if (minPrice && maxPrice) {
-                    conditions.push(`price BETWEEN ${minPrice} AND ${maxPrice}`)
-                } else if (minPrice) {
-                    conditions.push(`price >= ${minPrice}`)
-                } else {
-                    conditions.push(`price <= ${maxPrice}`)
-                }
-            }
-            query = `${query} AND ${conditions.join(' AND ')} ORDER BY p.id;`
+        let totalProducts = null
+        //Cojo el total de productos que hay en la base de datos
+        if (conditions.length > 0) {
+            [totalProducts] = await connection.query(
+                `SELECT COUNT(*) AS total FROM products p WHERE p.status IS NULL AND p.category = '${category}' AND ${conditions.join(
+                    ' AND '
+                )}`
+            )
+            totalProducts = totalProducts[0].total
         } else {
-            query = `${query} ORDER BY p.id;`
+            [totalProducts] = await connection.query(
+                `SELECT COUNT(*) AS total FROM products p WHERE p.status IS NULL AND p.category = '${category}'`
+            )
+            totalProducts = totalProducts[0].total
         }
+
+        //Cojo el total de paginas que hay en la base de datos
+        const totalPages = Math.ceil(totalProducts / MAX_PRODUCTS_PER_PAGE) //Redondeo para arriba
 
         //Cojo todos los products resultantes de la consulta
-        const [products] = await connection.query(`${query}`)
-
-        //si no existe el product devuelve un error
-        if (products.length === 0) {
-            res.status(404).send({
-                status: 'not found',
-                message: 'No existen productos con ese filtro',
-            })
-        }
-
-        //imprime el tamaño del array de products
+        const [products] = await connection.query(
+            `${query} LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
+        )
         console.log(products.length)
-
-        //Devuelve un array con todos los products
-        res.status(200).send(products)
+        //si no existen productos o la pagina devuelve un error
+        if (products.length === 0) {
+            throw generateError(
+                `Not Found. No existen o se borraron los productos con ese filtro`,
+                404
+            )
+        } else if (page > totalPages) {
+            throw generateError(
+                `Not Found. No exite la pagina ${page}, van del 1 al ${totalPages}`,
+                404
+            )
+        } else {
+            const urlBase = `http://${req.headers.host}/api/products/filterBy/category/${category}`
+            return res.status(200).send(await pagination(
+                urlBase, page, totalPages, totalProducts, offset, products, queryStrings
+                )
+            )
+        }
     } catch (error) {
         next(error) //Si llega aqui el error se envia al Middleware de gestion de errores
     } finally {
@@ -181,89 +285,88 @@ const getProductByCategory = async (req, res, next) => {
     }
 }
 
-async function validateFilterByUserId(payload) {
-    const schema = Joi.object({
-        category: Joi.string().max(60),
-        name: Joi.string().max(60),
-        location: Joi.string().max(60),
-        price: Joi.number().min(0).max(3500).integer(),
-        minPrice: Joi.number().min(0).integer(),
-        maxPrice: Joi.number().max(3500).integer(),
-        user_id: Joi.number().required(),
-    })
-
-    Joi.assert(payload, schema)
-}
+/***************************************************************
+ *************************BY USER_ID****************************
+ **************************************************************/
 
 const getProductByUserId = async (req, res, next) => {
-    let connection
-    const payload = { user_id: req.params.userId } //payload es un objeto con los params de la url
-    req.claims = { ...req.query } //req.claims es un objeto con los datos de la consulta de la url
-    const data = { ...payload, ...req.claims }
+    let connection = null
 
-    //Validamos los datos que recibimos
+    //DATOS DE LA PETICION
+    const user_id = req.params.userId
+    req.claims = { ...req.query } //req.claims es un objeto con los datos de la consulta de la url
+    const data = { ...req.claims }
+
+    //PARA LA PAGINACION
+    const page = parseInt(req.query.page, 10) || 1 //Pagina recibida por querystring o por defecto 1
+    const offset = (page - 1) * MAX_PRODUCTS_PER_PAGE //Registros que se saltaran
+
+    //VALIDACIONES
     try {
-        await validateFilterByUserId(data)
-    } catch (e) {
+        await validateProducts({ ...data, user_id })
+        console.log('Datos validos')
+    } catch (error) {
         return res.status(400).send({
             status: 'bad request',
-            message: 'Los datos introducidos no son correctos',
+            message: error.details[0].message,
         })
     }
 
-    //Hacemos la consulta a la base de datos
+    //OBTENER LOS ELEMENTOS DE LA BASE DE DATOS
     try {
         connection = await getConnection()
+        let conditions = []
+        let queryStrings = []
+        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  user_id = ${user_id}`
 
-        const { category, name, location, price, minPrice, maxPrice, user_id } =
-            data
-        console.log(user_id)
-        let query = `SELECT u.name AS user_name, p.id, p.category, p.name, p.price, p.location, p.image, p.caption FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  user_id = ${user_id}`
+        //Meter en query, conditions y queryStrings los elementos del objeto que devuelve la funcion createProductFilter
+        const result = await createProductFilter(data,query,queryStrings,conditions)
+        query = result.query
+        queryStrings = result.queryStrings
+        conditions = result.conditions
 
-        if (category || name || location || price || minPrice || maxPrice) {
-            const conditions = []
-            if (category) {
-                conditions.push(`category = "${category}"`)
-            }
-            if (name) {
-                conditions.push(`name = "${name}"`)
-            }
-            if (location) {
-                conditions.push(`location = "${location}"`)
-            }
-            if (price) {
-                conditions.push(`price = ${price}`)
-            }
-            if (minPrice || maxPrice) {
-                if (minPrice && maxPrice) {
-                    conditions.push(`price BETWEEN ${minPrice} AND ${maxPrice}`)
-                } else if (minPrice) {
-                    conditions.push(`price >= ${minPrice}`)
-                } else {
-                    conditions.push(`price <= ${maxPrice}`)
-                }
-            }
-            query = `${query} AND ${conditions.join(' AND ')} ORDER BY p.id;`
+        let totalProducts = null
+        //Cojo el total de productos que hay en la base de datos
+        if (conditions.length > 0) {
+            [totalProducts] = await connection.query(
+                `SELECT COUNT(*) AS total FROM products p WHERE p.status IS NULL AND p.user_id = ${user_id} AND ${conditions.join(
+                    ' AND '
+                )}`
+            )
+            totalProducts = totalProducts[0].total
         } else {
-            query = `${query} ORDER BY p.id;`
+            [totalProducts] = await connection.query(
+                `SELECT COUNT(*) AS total FROM products p WHERE p.status IS NULL AND p.user_id = ${user_id}`
+            )
+            totalProducts = totalProducts[0].total
         }
 
+        //Cojo el total de paginas que hay en la base de datos
+        let totalPages = Math.ceil(totalProducts / MAX_PRODUCTS_PER_PAGE) //Redondeo hacia arriba para obtener el total de paginas
+
         //Cojo todos los products resultantes de la consulta
-        const [products] = await connection.query(`${query}`)
+        const [products] = await connection.query(
+            `${query} LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
+        )
+        console.log(products.length)
 
         //si no existe el product devuelve un error
         if (products.length === 0) {
-            res.status(404).send({
-                status: 'not found',
-                message: 'No existen productos con ese filtro',
-            })
+            throw generateError(
+                `Not Found. No existen o se borraron los producto con ese filtro`,
+                404
+            )
+        } else if (page > totalPages) {
+            throw generateError(
+                `Not Found. No exite la pagina ${page}, van del 1 al ${totalPages}`,
+                404
+            )
+        } else {
+            const urlBase = `http://${req.headers.host}/api/products/filterBy/userId/${user_id}`
+            return res.status(200).send(
+                await pagination(urlBase,page,totalPages,totalProducts,offset,products,queryStrings)
+            )
         }
-
-        //imprime el tamaño del array de products
-        console.log(products.length)
-
-        //Devuelve un array con todos los products
-        res.status(200).send(products)
     } catch (error) {
         next(error) //Si llega aqui el error se envia al Middleware de gestion de errores
     } finally {
@@ -273,9 +376,89 @@ const getProductByUserId = async (req, res, next) => {
     }
 }
 
-module.exports = {
-    getAllProducts,
-    getProductById,
-    getProductByCategory,
-    getProductByUserId,
+/***************************************************************
+ *************************BY BOUGHT*****************************
+ **************************************************************/
+
+const getBoughtProduct = async (req, res, next) => {
+    let connection = null
+
+    //DATOS DE LA PETICION
+    req.claims = { ...req.query } //req.claims es un objeto con los datos de la consulta de la url
+    const data = { ...req.claims }
+
+    //PARA LA PAGINACION
+    const page = parseInt(req.query.page, 10) || 1 //Pagina recibida por querystring o por defecto 1
+    const offset = (page - 1) * MAX_PRODUCTS_PER_PAGE //Registros que se saltaran
+
+    //VALIDACIONES
+    try {
+        await validateProducts(data)
+        console.log('Datos validados')
+    } catch (error) {
+        return res.status(400).send({
+            status: 'bad request',
+            message: error.details[0].message,
+        })
+    }
+
+    //OBTENER LOS ELEMENTOS DE LA BASE DE DATOS
+    try {
+        connection = await getConnection()
+        let conditions = []
+        let queryStrings = []
+        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.likes, p.image, p.caption, u.name AS user_name, u.score AS user_score, p.valoration, p.buyer_id FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status = 'bought'`
+
+        //Meter en query, conditions y queryStrings los elementos del objeto que devuelve la funcion createProductFilter
+        const result = await createProductFilter(data,query,conditions,queryStrings)
+        query = result.query
+        conditions = result.conditions
+        queryStrings = result.queryStrings
+
+        let totalProducts = null
+        //Cojo el total de productos que hay en la base de datos
+        if (conditions.length > 0) {
+            [totalProducts] = await connection.query(
+                `SELECT COUNT(*) AS total FROM products p WHERE p.status = 'bought' AND ${conditions.join(
+                    ' AND '
+                )}`
+            )
+            totalProducts = totalProducts[0].total
+        } else {
+            [totalProducts] = await connection.query(
+                `SELECT COUNT(*) AS total FROM products p WHERE p.status = 'bought'`
+            )
+            totalProducts = totalProducts[0].total
+        }
+
+        //Cojo el total de paginas que hay en la base de datos
+        let totalPages = Math.ceil(totalProducts / MAX_PRODUCTS_PER_PAGE) //Redondeo hacia arriba para obtener el total de paginas
+
+        const [products] = await connection.query(
+            `${query} LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
+        )
+        console.log(products.length)
+        if (products.length === 0) {
+            throw generateError(
+                `Not Found. No existen o se borraron los producto con ese filtro`, 404
+            )
+        } else if (page > totalPages) {
+            throw generateError(
+                `Not Found. No exite la pagina ${page}, van del 1 al ${totalPages}`, 404
+            )
+        } else {
+            const urlBase = `http://${req.headers.host}/api/products/filterBy/bought`
+            return res.status(200).send(
+                await pagination(urlBase,page,totalPages,totalProducts,offset,products,queryStrings)
+            )
+        }
+    } catch (error) {
+        next(error)
+    } finally {
+        if (connection) {
+            connection.release()
+        }
+    }
 }
+
+module.exports = { getAllProducts, getProductById, getProductByCategory, getProductByUserId, getBoughtProduct, }

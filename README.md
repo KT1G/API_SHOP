@@ -23,7 +23,7 @@ Los requisitos que se piden para la creación de la API se encuentran en el arch
 ### Uso de la API
 ------------
 #### Postman
-En los archivos de la API se encuentra el archivo" " el cual deberemos importar en nuestro postman personal para probar los diferentes endpoints. Se recomienda configurar las variables de entorno para una mejor experiencia de usuario.
+En los archivos de la API se encuentra el archivo ***API_SHOP.postman_collection.json*** el cual deberemos importar en nuestro postman personal para probar los diferentes endpoints. Se recomienda configurar las variables de entorno para una mejor experiencia de usuario.
 
 #### ENDPOINTS
 
@@ -34,9 +34,9 @@ A continuación se detallan los diferentes endpoints, tanto su funcionamiento co
 
 Este endpoint se encarga de la creacion del usuario, para ello devemos enviar por el body con el formato **raw** un objeto tipo **JSON** con los siguientes parametros.
 
-- name: "David"
-- email: " habfakerbraian@yopmail.com"
-- password: "mypassword"
+- **name**: "David"
+- **email**: " habfakerbraian@yopmail.com"
+- **password**: "mypassword"
 
 Si el usuario se crea con éxito se enviará un email de activación al correo especificado.
 
@@ -103,8 +103,8 @@ Para la activación de la cuenta debemos copiar el link que se nos envía y pega
 
 En este endpoint comprobamos y permitimos que un usuario se logue en la APP. Para ello debemos insertar por el body con el formato **raw** un objeto tipo **JSON** con los siguientes parámetros.
 
-- email:"habfakerBraian@yopmail.com"
-- password: "mypassword"
+- ****email**:"habfakerBraian@yopmail.com"
+- password**: "mypassword"
 
 Si el usuario se loguea con este, se le devolverá por la respuesta un objeto con un token de acceso, el cual le permitirá permanecer conectado por un determinado periodo de tiempo.
 
@@ -125,12 +125,12 @@ En este endpoint nos encargamos de publicar un producto para ponerlo a la venta.
 
 Para publicar un producto debemos introducir por el body con el formato **form-data** los siguientes parámetros.
 
-- image: "iphone.jpeg" (required). *Formatos validos de imagen.
-- name : example => " Pc gaming MSI". (required).
-- category: example => " desktop" (required) *Categorías Válidas.
-- price: example => "400" (required).
-- location: "Coruña " (required).
-- caption: "Ordenador portatil MSI ".
+- **image**: "iphone.jpeg" (required). *Formatos validos de imagen.
+- **name** : " Pc gaming MSI". (required).
+- **category:**  " desktop" (required) *Categorías Válidas.
+- **price**:  "400" (required).
+- **location**: "Coruña " (required).
+- **caption**: "Ordenador portatil MSI ".
 
 > **Categorías Válidas:** 'desktop', 'notebook' ,' tablet', 'smatphone', 'ebook', smartwhatch', 'console'' 'tv', 'camera', 'mouse', 'keyboard', 'headset', 'speaker', 'printer', 'scanner', 'charger',
 
@@ -165,6 +165,29 @@ Si el usuario consigue realizar la solicitud de compra correctamente, se enviar�
 5. - Comprobamos que el producto no haya sido vendido.
 
 ------------
+- **Confirm purcharse**: URL del postman =>**/api/products/13/confirm**
+
+En este endpoint confirmamos la venta de un producto. A esta URL solo se puede acceder a traves del enlace que nos llega al correo del vendedor, para usarlo debemos copiar y pegar en el endpoint del postman con el nombre *"Confirm purcharse"*
+
+> 	Ejemplo: http://localhost:9000/api/products/13/confirm?email="token"
+
+Para indicar la fecha y lugar de entrega debemos enviar por el body con el formato **raw** un objeto tipo **JSON** con los siguientes parametros.
+
+- **deliveryTime**: "2022-09-01 12:34",
+- **deliveryAddress**: "Capitan Juan Varela"
+
+Si el vendedor acepta la compra se le enviará un correo al comprador con los detalles de la venta y un link para votar el vendedor una vez se haya entregado el producto.
+
+**VALIDACIONES**
+
+1. - Comprobamos que la URL sea la correcta.
+2. - Comprobamos que el usuario este logueado.
+3. - Validamos los datos que nos llegan por el body y por la URL.
+4. - Comprobamos que la persona que realioza la venta del producto,  sea la misma que lo publicó.
+5. - Comprobamos que el producto este disponible para comprar.
+------------
+
+
 - **Get Products**:
  - **Get All Products** URL del postman => **/api/products**.
  
@@ -301,3 +324,25 @@ Si el usuario consigue realizar la solicitud de compra correctamente, se enviar�
 2. - Comprobamos que el usuario este logueado.
 3. - Validamos los datos que nos llegan por **params** y el **body**. Comprobamos que se hayan especificado todos los datos requeridos, y que los datos introducidos sean correctos y estén dentro de las categorías y formatos válidos.
 4. - Procedemos a la actualización.
+
+------------
+
+#### Users
+
+- **Vote users**: URL del postman => **/api/users/score/:id**.
+
+Este endpoint se encarga de gestionar la valoracion de los vendedores. Para ello debemos recuperar el link que nos envio el vendedor al correo con los datos de la venta del producto y pegarlo en la ruta del postman *"Vote users".*
+
+>  Ejemplo: http://localhost:9000/api/users/score/2?vote=3
+
+Si el producto ha sido entregado el comprador podrá valorar el producto a traves del link mencionado anteriormente.
+
+**VALIDACIONES**
+
+1. - Validamos que la URL sea la correcta.
+2. - Validamos los datos que nos llegan por la query sean correctos
+3. - Comprobar que el producto ha sido comprado y que el status sea "bought" en la DDBB. 
+4. - Comprobamos que el usuario solo pueda valorar productos que no le pertenezcan y solo pueda valorar una vez por producto.
+5. - Comprobar que el producto ha sido entregado mirando la hora de entrega y la hora actual. 
+
+

@@ -18,7 +18,7 @@ Los requisitos que se piden para la creación de la API se encuentran en el arch
 
 - La función *"initDB"* crea la DDBB con las distintas tablas necesarias para su uso, así como una serie de usuarios y productos para que se puedan hacer búsquedas más complejas entre otras funciones. Para vuestra comodidad dejamos activos los siguientes emails que ya están registrados en mailgun.
 
-> "habfakerBraian@yopmail.com" y "habfakerLuis@yopmail.com" para probar los endpoints de creación y activación de los usuarios así como el resto de endpoints. y otros 3 "habfakeruser-example@yopmail.com" que ya están activados en la base de datos en los que se cargan los diferentes productos. IMPORTANTE! Sustituir la palabra example por un número entre 1-3.
+> "habfakebraian@yopmail.com" y "habfakeluis@yopmail.com" para probar los endpoints de creación y activación de los usuarios así como el resto de endpoints. y otros 3 "habfakeuser-example@yopmail.com" que ya están activados en la base de datos en los que se cargan los diferentes productos. IMPORTANTE! Sustituir la palabra example por un número entre 1-3.
 
 ### Uso de la API
 ------------
@@ -35,7 +35,7 @@ A continuación se detallan los diferentes endpoints, tanto su funcionamiento co
 Este endpoint se encarga de la creacion del usuario, para ello devemos enviar por el body con el formato **raw** un objeto tipo **JSON** con los siguientes parametros.
 
 - name: "David"
-- email: " habfakerBraian@yopmail.com"
+- email: " habfakerbraian@yopmail.com"
 - password: "mypassword"
 
 Si el usuario se crea con éxito se enviará un email de activación al correo especificado.
@@ -50,14 +50,42 @@ Para la activación de la cuenta debemos copiar el link que se nos envía y pega
 4. - Comprobamos que el email se envíe con éxito.
 
 ------------
-- **Deleted Account**: 
-   -**Delete My Account** URL del postman => **/api/accounts/delete**.
+- **Deleted Account** : 
+
+ - **Delete My Account** URL del postman => **/api/accounts/delete**.
+   
    En este endpoint un usuario logeado puede borrar su cuenta.
-   Al hacerlo elimina todo su rastro de la base de datos, por efecto cascada desaparecen los likes, bookings, products, user y los directorios de las fotos de sus productos y de su avatar
-   -**Delete Account By Id** URL del postman => **/api/accounts/delete/byId/:id**
-   En este endpoint un usuario logeado y que sea **Admin** puede borrar 1 o mas cuentas concatenando el id de cada una '1-2-3-4', con las mismas consecuencias que en **Delete Account By Id**
-   -**Delete Account By Admin** URL del postman => **/api/accounts/delete/byAdmin**
-   En este endpoint un usuario logeado y que sea **Admin** puede borrar todas las cuentas de usuarios que no sean **Admin**, con las mismas consecuencias que en **Delete Account By Id**
+   
+   Para solicitar el borrado de su account debemos introducir la siguiente URL:
+
+ 	> Ejemplo: http://localhost:9000/api/accounts/delete
+ 
+	-***Consecuencias*** :
+ 		-Al hacerlo elimina todo su rastro de la base de datos, por efecto cascada desaparecen los likes, bookings, products, user y los directorios de las fotos de sus productos y de su avatar.
+		-Actualizamos en la columna **loves**, el numero de likes dados por los usuarios; al borrar una account desaparecen todas las referencias de las tablas likes, bookings y products. Como consecuencia el usuario tiene menos productos en su lista de likes.
+
+ - **Delete Account By Id** URL del postman => **/api/accounts/delete/byId/:id**
+
+   En este endpoint un usuario logeado y que sea **Admin** puede borrar 1 o mas cuentas concatenando el id de cada una '1-2-3-4'.
+   
+   Para solicitar el borrado de 1 o mas accounts debemos introducir la siguiente URL:
+
+	> Ejemplo: http://localhost:9000/api/accounts/delete/byId/1
+ o
+ Ejemplo: http://localhost:9000/api/accounts/delete/byId/1-2-3-4
+
+	-***Consecuencias*** :
+		Este borrado tiene las mismas consecuencias que en **Delete My Account**
+
+ - **Delete Account By Admin** URL del postman => **/api/accounts/delete/byAdmin**
+   En este endpoint un usuario logeado y que sea **Admin** puede borrar todas las cuentas de usuarios que no sean **Admin**.
+   
+	Para solicitar el borrado de su account debemos introducir la siguiente URL:
+
+	> Ejemplo: http://localhost:9000/api/accounts/delete/byAdmin
+ 
+	-***Consecuencias*** :
+		Este borrado tiene las mismas consecuencias que en **Delete My Account**
 
 **VALIDACIONES**
 
@@ -66,7 +94,7 @@ Para la activación de la cuenta debemos copiar el link que se nos envía y pega
 3. - Comprobamos que el usuario esta borrando su propia cuenta o si es **Admin**.
 4. - Preparamos las rutas de las fotos de productos y avatar.
 5. - Procedemos al borrado
-6. - Actualizamos en la columna **loves**, el numero likes dados por los usuarios ya que al borrar cuentas  desaparecen productos de las tablas likes, bookings y products. Como consecuencia el usuario tiene menos productos en su lista de likes
+6. - Actualizamos en la columna **loves**.
 ------------
 
 #### Auth
@@ -138,17 +166,138 @@ Si el usuario consigue realizar la solicitud de compra correctamente, se enviar�
 
 ------------
 - **Get Products**:
-   -**Get All Products** URL del postman => **/api/products**.
-   En este endpoint
-   -**Get Product By Id**URL del postman => **/api/products/filterBy/id/:id**.
-   En este endpoint
-   -**Get Product By Id**URL del postman => **/api/products/filterBy/category/:category**
-   En este endpoint
-   -**Get Product By Id**URL del postman => **/api/products/filterBy/userId/:userId**
-   En este endpoint
+ - **Get All Products** URL del postman => **/api/products**.
+ 
+   En este endpoint **cualquier** usuario puede ver todos los productos de la tienda
    
-   **VALIDACIONES**
+   	Para obtener todos los **productos** debemos introducir la siguiente URL:
+
+	> Ejemplo: http://localhost:9000/api/products
+ 
+ - **Get Product By Id** URL del postman => **/api/products/filterBy/id/:id**.
+ 
+   En este endpoint **cualquier** usuario puede ver 1 o mas productos concatenando el id de cada una '1-2-3-4'.
+   
+   	Para obtener todos los **productos** debemos introducir la siguiente URL:
+
+	> Ejemplo: http://localhost:9000/api/products/filterBy/id/1
+	o
+	Ejemplo: http://localhost:9000/api/products/filterBy/id/1-2-3-4
+ 
+ - **Get Product By Category** URL del postman => **/api/products/filterBy/category/:category**
+ 
+   En este endpoint **cualquier** usuario puede ver todos los productos de la tienda filtrandolos por **category** y ademas añadir mas filtros
+   
+   	Para obtener todos los **productos** debemos introducir la siguiente URL:
+
+	> Ejemplo: http://localhost:9000/api/products/filterBy/category/tv
+	o
+	Ejemplo: http://localhost:9000/api/products/filterBy/category/tv?minPrice=300
+ 
+ - **Get Product By User Id** URL del postman => **/api/products/filterBy/userId/:userId**
+ 
+   En este endpoint **cualquier** usuario puede ver todos los productos de la tienda filtrandolos por **userId** y ademas añadir mas filtros
+   
+   	Para obtener todos los **productos** debemos introducir la siguiente URL:
+
+	> Ejemplo: http://localhost:9000/api/products/filterBy/userId/4
+	o
+	Ejemplo: http://localhost:9000/api/products/filterBy/userId/4?categoy=tablet
+ 
+ - **Get Product By Bought** URL del postman => **/api/products/filterBy/bought**
+ 
+   En este endpoint **cualquier** usuario puede ver todos los productos de la tienda filtrandolos por **userId** y ademas añadir mas filtros
+   
+   	Para obtener todos los **productos** debemos introducir la siguiente URL:
+
+	> Ejemplo: http://localhost:9000/api/products/filterBy/bought
+
+**VALIDACIONES**
 
 1. - Comprobamos que la URL sea la correcta.
-2. - Validamos los datos que nos llegan por params y queryStrings. comprobamos que los datos sean correctos con una funcion de Validacion.
-3. - .
+2. - Validamos los datos que nos llegan por params y queryStrings. Comprobamos que los datos sean correctos con una funcion de Validacion.
+3. - Procedemos a realizar la peticion
+
+------------
+- **Delete Products**:
+
+ - **Delete Product By Id** URL del postman => **/api/products/delete/byId/:id**.
+   
+    En este endpoint un usuario logeado o que sea **Admin** puede borrar 1 o mas productos concatenando el id de cada una '1-2-3-4'.
+   
+   Para solicitar el borrado de 1 o mas productos debemos introducir la siguiente URL:
+
+	> Ejemplo: http://localhost:9000/api/products/delete/byId/1
+ o
+ Ejemplo: http://localhost:9000/api/products/delete/byId/1-2-3-4
+ 
+	-***Consecuencias*** :
+ 		-Al hacerlo elimina todo del producto de la base de datos, por efecto cascada desaparecen los likes, bookings, products y los directorios de las fotos de sus productos.
+		-Actualizamos en la columna "loves" de "users", el numero de likes dados por los usuarios; al borrar una account desaparecen todas las referencias de las tablas likes, bookings y products. Como consecuencia el usuario tiene menos productos en su lista de likes.
+		-Actualizamos en la columna "likes" de "users", el numero de likes recibidos por el dueño del producto; al borrar el producto desaparecen todas las referencias de las tablas likes, bookings y products. Como consecuencia el usuario tiene menos likes en sus productos.
+
+ - **Delete Account By User Id** URL del postman => **/api/products/delete/byUserId/:id**
+   En este endpoint un usuario logeado o que sea **Admin** puede borrar todos sus productoso los de un usuario que no sea **Admin**.
+   
+	Para solicitar el borrado de los productos de 1 usuario debemos introducir la siguiente URL:
+
+	> Ejemplo: http://localhost:9000/apiproducts/delete/byUserId/1
+ 
+	-***Consecuencias*** :
+		Este borrado tiene las mismas consecuencias que en **Delete Product By Id**
+
+ - **Delete Account By Admin** URL del postman => **/api/products/delete/byAdmin**
+   En este endpoint un usuario logeado y que sea **Admin** puede borrar todos los productos de usuarios que no sean **Admin**.
+   
+	Para solicitar el borrado de los productos debemos introducir la siguiente URL:
+
+	> Ejemplo: http://localhost:9000/api/products/delete/byAdmin
+ 
+	-***Consecuencias*** :
+		Este borrado tiene las mismas consecuencias que en **Delete Product By Id**
+
+**VALIDACIONES**
+
+1. - Validamos que la URL sea la correcta.
+2. - Validamos los datos que nos llegan por params, comprobamos que los datos sean correctos con una funcion de Validacion.
+3. - Comprobamos que existen productos.
+4. - Comprobamos que el usuario esta borrando sus productos.
+5. - Comprobamos que el usuario es **Admin**.
+6. - Comprobamos si los productos son de un usuario **Admin**.
+7. - Preparamos las rutas de las fotos de productos.
+8. - Procedemos al borrado.
+9. - Actualizamos la columna **loves** de **users**.
+10. - Actualizamos la columna **likes** de **users**.
+------------
+
+
+- **Update Products**:
+
+ - **Update Product Info** URL del postman => **/api/products/update/info/:id**.
+   
+    En este endpoint un usuario logeado o que sea **Admin** puede actualizar la **info** (name, category, location, price, caption ) de 1 producto.
+   
+   Para solicitar la actualizacion de la info 1 producto debemos introducir la siguiente URL:
+
+	> Ejemplo: http://localhost:9000/api/products/update/info/1
+ 
+	-***Consecuencias*** :
+ 		-Al hacerlo se modifica la "info" del producto de la base de datos.
+
+  - **Update Product Image** URL del postman => **/api/products/update/image/:id**.
+  
+   En este endpoint un usuario logeado o que sea **Admin** puede actualizar la **image** de 1 producto.
+   
+   Para solicitar la actualizacion del image de 1 producto debemos introducir la siguiente URL:
+
+	> Ejemplo: http://localhost:9000/api/products/update/image/1
+ 
+	-***Consecuencias*** :
+		Este borrado tiene las mismas consecuencias que en **Update Product Info**
+
+**VALIDACIONES**
+
+1. - Comprobamos que la URL sea la correcta.
+2. - Comprobamos que el usuario este logueado.
+3. - Validamos los datos que nos llegan por **params** y el **body**. Comprobamos que se hayan especificado todos los datos requeridos, y que los datos introducidos sean correctos y estén dentro de las categorías y formatos válidos.
+4. - Procedemos a la actualización.

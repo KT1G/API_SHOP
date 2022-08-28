@@ -50,8 +50,23 @@ Para la activación de la cuenta debemos copiar el link que se nos envía y pega
 4. - Comprobamos que el email se envíe con éxito.
 
 ------------
-- **Deleted User**: URL del postman => **la que sea**.
+- **Deleted Account**: 
+   -**Delete My Account** URL del postman => **/api/accounts/delete**.
+   En este endpoint un usuario logeado puede borrar su cuenta.
+   Al hacerlo elimina todo su rastro de la base de datos, por efecto cascada desaparecen los likes, bookings, products, user y los directorios de las fotos de sus productos y de su avatar
+   -**Delete Account By Id** URL del postman => **/api/accounts/delete/byId/:id**
+   En este endpoint un usuario logeado y que sea **Admin** puede borrar 1 o mas cuentas concatenando el id de cada una '1-2-3-4', con las mismas consecuencias que en **Delete Account By Id**
+   -**Delete Account By Admin** URL del postman => **/api/accounts/delete/byAdmin**
+   En este endpoint un usuario logeado y que sea **Admin** puede borrar todas las cuentas de usuarios que no sean **Admin**, con las mismas consecuencias que en **Delete Account By Id**
 
+**VALIDACIONES**
+
+1. - Validamos que la URL sea la correcta.
+2. - Validamos los datos que nos llegan por params, comprobamos que los datos sean correctos con una funcion de Validacion.
+3. - Comprobamos que el usuario esta borrando su propia cuenta o si es **Admin**.
+4. - Preparamos las rutas de las fotos de productos y avatar.
+5. - Procedemos al borrado
+6. - Actualizamos en la columna **loves**, el numero likes dados por los usuarios ya que al borrar cuentas  desaparecen productos de las tablas likes, bookings y products. Como consecuencia el usuario tiene menos productos en su lista de likes
 ------------
 
 #### Auth
@@ -121,5 +136,19 @@ Si el usuario consigue realizar la solicitud de compra correctamente, se enviar�
 4. - Comprobamos que la persona que solicita la compra del producto, no sea la misma que lo publicó.
 5. - Comprobamos que el producto no haya sido vendido.
 
+------------
+- **Get Products**:
+   -**Get All Products** URL del postman => **/api/products**.
+   En este endpoint
+   -**Get Product By Id**URL del postman => **/api/products/filterBy/id/:id**.
+   En este endpoint
+   -**Get Product By Id**URL del postman => **/api/products/filterBy/category/:category**
+   En este endpoint
+   -**Get Product By Id**URL del postman => **/api/products/filterBy/userId/:userId**
+   En este endpoint
+   
+   **VALIDACIONES**
 
-
+1. - Comprobamos que la URL sea la correcta.
+2. - Validamos los datos que nos llegan por params y queryStrings. comprobamos que los datos sean correctos con una funcion de Validacion.
+3. - .

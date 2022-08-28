@@ -39,7 +39,11 @@ async function sendEmail({ emailFrom, emailTo, product, idProduct, token }) {
 async function buyProduct(req, res) {
     /*
      * 1 . Validar datos que nos llegan por los params, en concreto el (id)👌
+<<<<<<< Updated upstream
      * 2 . Comprobar que el producto se encuentra en la DDBB y que el status no sea "bought"👌
+=======
+     * 2 . Comprobar que el producto se encuentra en la DDBB y que el status no esté "reserved" o "bought"👌
+>>>>>>> Stashed changes
      * 3. Enviar un correo con los datos necesarios del comprador y del producto👌
      */
     const data = {

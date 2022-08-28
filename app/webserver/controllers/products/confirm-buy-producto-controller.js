@@ -98,13 +98,12 @@ async function postConfirmBuyProduct(req, res) {
     }
 
     // Validamos que el usuario registrado sea el correcto comprobando la ID de las claims con la del propietario del producto.
-    let connection
+    let connection = null
     let sellerEmail = null
     try {
         connection = await getConnection()
-        const [rows] = await connection.query(`SELECT u.email, p.user_id 
-                                                FROM users u 
-                                                JOIN products p  ON u.id = p.user_id  WHERE p.id = ${data.idProduct} `)
+        const [rows] = await connection.query(
+            `SELECT u.email, p.user_id FROM users u JOIN products p  ON u.id = p.user_id  WHERE p.id = ${data.idProduct} `)
         const userIdProduct = rows[0]
 
         sellerEmail = rows[0].email
@@ -117,9 +116,8 @@ async function postConfirmBuyProduct(req, res) {
 
         if (userIdProduct.user_id !== userId) {
             return res.status(403).send({
-                status: 'Anauthorized',
-                message:
-                    'No tiene permisos para acceder a esta ruta debe ser el propietario del producto',
+                status: 'Unauthorized',
+                message: 'No tiene permisos para acceder a esta ruta debe ser el propietario del producto'
             })
         }
     } catch (e) {

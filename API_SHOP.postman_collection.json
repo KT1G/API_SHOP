@@ -3,7 +3,7 @@
 		"_postman_id": "543c0f71-b87a-4033-9d63-f00698258e33",
 		"name": "API_SHOP",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "22403558"
+		"_exporter_id": "21959476"
 	},
 	"item": [
 		{
@@ -50,13 +50,13 @@
 							}
 						],
 						"url": {
-							"raw": "http:/{{host}}:{{port}}/api/accounts/delete",
+							"raw": "http://{{host}}:{{port}}/api/accounts/delete",
+							"protocol": "http",
 							"host": [
-								"http"
+								"{{host}}"
 							],
-							"port": "",
+							"port": "{{port}}",
 							"path": [
-								"{{host}}:{{port}}",
 								"api",
 								"accounts",
 								"delete"
@@ -77,13 +77,13 @@
 							}
 						],
 						"url": {
-							"raw": "http:/{{host}}:{{port}}/api/accounts/delete/byId/3-4",
+							"raw": "http://{{host}}:{{port}}/api/accounts/delete/byId/3-4",
+							"protocol": "http",
 							"host": [
-								"http"
+								"{{host}}"
 							],
-							"port": "",
+							"port": "{{port}}",
 							"path": [
-								"{{host}}:{{port}}",
 								"api",
 								"accounts",
 								"delete",
@@ -106,13 +106,13 @@
 							}
 						],
 						"url": {
-							"raw": "http:/{{host}}:{{port}}/api/accounts/delete/byAdmin",
+							"raw": "http://{{host}}:{{port}}/api/accounts/delete/byAdmin",
+							"protocol": "http",
 							"host": [
-								"http"
+								"{{host}}"
 							],
-							"port": "",
+							"port": "{{port}}",
 							"path": [
-								"{{host}}:{{port}}",
 								"api",
 								"accounts",
 								"delete",
@@ -274,12 +274,12 @@
 						"method": "POST",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:9000/products/:id/confirm",
+							"raw": "http://{{host}}:{{port}}/products/:id/confirm",
 							"protocol": "http",
 							"host": [
-								"localhost"
+								"{{host}}"
 							],
-							"port": "9000",
+							"port": "{{port}}",
 							"path": [
 								"products",
 								":id",
@@ -404,13 +404,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http:/{{host}}:{{port}}/api/products/filterBy/bought",
+							"raw": "http://{{host}}:{{port}}/api/products/filterBy/bought",
+							"protocol": "http",
 							"host": [
-								"http"
+								"{{host}}"
 							],
-							"port": "",
+							"port": "{{port}}",
 							"path": [
-								"{{host}}:{{port}}",
 								"api",
 								"products",
 								"filterBy",

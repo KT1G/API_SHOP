@@ -17,7 +17,7 @@ router.post('/accounts', createAccount)
 router.get('/accounts/confirm/:id', validateAccount)
 
 //Borrar el usuario logueado
-router.delete('/accounts/delete', checkAccountSession, deleteMyAccount)
+router.delete('/accounts/delete/myAccount', checkAccountSession, deleteMyAccount)
 
 //Borrar usuarios por id
 router.delete('/accounts/delete/byId/:id', checkAccountSession, deleteAccountById)

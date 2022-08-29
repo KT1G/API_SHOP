@@ -1,7 +1,7 @@
 // 'use strict'
 
-const { getConnection } = require('./db')
-const { getToken } = require('../../helpers')
+const { getConnection } = require('../app/db/db')
+const { getToken } = require('../helpers')
 const Chance = require('chance')
 const chance = new Chance()
 const v4 = require('uuid').v4

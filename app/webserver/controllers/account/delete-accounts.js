@@ -1,8 +1,5 @@
 'use strict'
 
-//Para la creacion de un squema y poder validar los datos que recibimos
-const Joi = require('joi')
-
 //Para Borrar directorios y archivos
 const fs = require('fs/promises')
 
@@ -13,7 +10,7 @@ const path = require('path')
 const { getConnection } = require('../../../db/db.js')
 
 //Importar del archivo de la ruta ../helpers.js la Variable que uso para la Gestion de Errores
-const { generateError } = require('../../../../helpers.js')
+const { generateError, validateUsers } = require('../../../../helpers.js')
 
 const PROJECT_MAIN_FOLDER_PATH = process.cwd()
 const PRODUCTS_FOLDER_PATH = path.join(PROJECT_MAIN_FOLDER_PATH, 'public', 'uploads', 'products')
@@ -48,13 +45,13 @@ const deleteMyAccount = async (req, res, next) => {
  ****************************BY ID******************************
  **************************************************************/
 
-async function validateId(payload) {
+/* async function validateId(payload) {
     const schema = Joi.object({
         id: Joi.number().min(1).required(),
     })
 
     Joi.assert(payload, schema)
-}
+} */
 
 const deleteAccountById = async (req, res, next) => {
     let connection = null
@@ -71,13 +68,14 @@ const deleteAccountById = async (req, res, next) => {
             idArray = id.split('-')
             //Comprobar que cada dato cumpla con validateId
             for (let i = 0; i < idArray.length; i++) {
-                const object = { id: idArray[i] }
-                await validateId(object)
+                //const object = { id: idArray[i] }
+                await validateUsers({ id: idArray[i] })
+                console.log('Datos validos');
             }
             console.log('Datos validados')
         } else {
-            const object = { id: id }
-            await validateId(object)
+            //const object = { id: id }
+            await validateUsers(id)
             console.log('Dato validado')
         }
     } catch (error) {
@@ -154,7 +152,7 @@ const deleteAccountById = async (req, res, next) => {
                     if (fs.access(productPath)) {fs.rm(productPath, { recursive: true })}
                     if (fs.access(userPath)) {fs.rm(userPath, { recursive: true })}
                     //Borrar el usuario de la DDBB
-                    await connection.query('DELETE FROM users WHERE id = ?', [id,])
+                    await connection.query('DELETE FROM users WHERE id = ?', [id])
                 }
                 res.status(200).send('Usuario borrado')
             }

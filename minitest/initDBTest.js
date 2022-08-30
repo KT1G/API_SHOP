@@ -11,7 +11,7 @@ const path = require('path')
 const PROJECT_MAIN_FOLDER_PATH = process.cwd()
 const PUBLIC_FOLDER_PATH = path.join(PROJECT_MAIN_FOLDER_PATH, 'public')
 const PRODUCTS_FOLDER_PATH = path.join(
-    PROJECT_MAIN_FOLDER_PATH,
+    PUBLIC_FOLDER_PATH,
     'uploads',
     'products'
 )
@@ -45,7 +45,7 @@ async function initDBTest() {
                 created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 code VARCHAR(255) NULL,
                 score decimal(3,2) NULL DEFAULT 0,
-                status VARCHAR(60) NULL DEFAULT 'active',
+                status VARCHAR(60) NULL,
                 avatar VARCHAR(255) NULL,
                 bio VARCHAR(255) NULL,
                 loves INT NULL DEFAULT 0,
@@ -107,17 +107,17 @@ async function initDBTest() {
         const FAKE_USERS = 3
         const password = 'mypassword'
 
-        console.log('entró')
         for (let i = 0; i < FAKE_USERS; i++) {
             const email = `habfakeuser-${i + 1}@yopmail.com`
             const code = `${v4()}`
             await connection.query(
-                `INSERT INTO users (name, email, password, code) VALUES(?, ?, ?, ?)`,
+                `INSERT INTO users (name, email, password, code, status) VALUES(?, ?, ?, ?, ?)`,
                 [
                     chance.name(),
                     email,
                     `${await bcrypt.hash(password, 8)}`,
                     code,
+                    'active'
                 ]
             )
         }

@@ -23,6 +23,21 @@ const getTokenData = (token) => {
     return jwt.verify(token, authJwtSecret)
 }
 
+async function validateUsers(payload) {
+    const schema = Joi.object({
+        id: Joi.number().integer().positive().min(1),
+        name: Joi.string().max(60),
+        email: Joi.string().email().max(255),
+        password: Joi.string().max(60),
+        code: Joi.string().max(255),
+        status: Joi.string().max(60).valid('active', 'admin'),
+        bio: Joi.string().max(255),
+        page: Joi.number().integer().positive().min(1),
+    })
+
+    Joi.assert(payload, schema)
+}
+
 async function validateProducts(payload) {
     const schema = Joi.object({
         id: Joi.number().integer().positive().min(1),
@@ -173,4 +188,4 @@ async function pagination(urlBase, page, totalPages, totalObject, offset, object
     }
 }
 
-module.exports = { generateError, getToken, getTokenData, validateProducts, validateLikes, createProductFilter, pagination }
+module.exports = { generateError, getToken, getTokenData, validateUsers, validateProducts, validateLikes, createProductFilter, pagination }

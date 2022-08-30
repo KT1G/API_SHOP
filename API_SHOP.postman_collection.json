@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "543c0f71-b87a-4033-9d63-f00698258e33",
+		"_postman_id": "6556cd0d-210c-4791-9d39-7d3282a16de8",
 		"name": "API_SHOP",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "21959476"
@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"luis\",\n    \"email\": \"habluis2022@yopmail.com\",\n    \"password\":\"mypassword\"\n}",
+							"raw": "{\n    \"name\": \"luis\",\n    \"email\": \"habfakeluis@yopmail.com\",\n    \"password\":\"mypassword\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -50,7 +50,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://{{host}}:{{port}}/api/accounts/delete",
+							"raw": "http://{{host}}:{{port}}/api/accounts/delete/myAccount",
 							"protocol": "http",
 							"host": [
 								"{{host}}"
@@ -59,7 +59,8 @@
 							"path": [
 								"api",
 								"accounts",
-								"delete"
+								"delete",
+								"myAccount"
 							]
 						}
 					},
@@ -77,7 +78,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://{{host}}:{{port}}/api/accounts/delete/byId/3-4",
+							"raw": "http://{{host}}:{{port}}/api/accounts/delete/byId/2-3",
 							"protocol": "http",
 							"host": [
 								"{{host}}"
@@ -88,7 +89,7 @@
 								"accounts",
 								"delete",
 								"byId",
-								"3-4"
+								"2-3"
 							]
 						}
 					},
@@ -145,7 +146,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\":\"habluis2022@yopmail.com\",\n    \"password\": \"mypassword\"\n}",
+							"raw": "{\n    \"email\":\"habfakeluis@yopmail.com\",\n    \"password\": \"mypassword\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -189,7 +190,7 @@
 								{
 									"key": "image",
 									"type": "file",
-									"src": "/home/hacker/Desktop/Bootcamp/fotos/hp.jpeg"
+									"src": "/C:/Users/Usuario/Desktop/Programacion/Curso_HackABoss/Proyectos/Tienda/API_SHOP/logo/logo.png"
 								},
 								{
 									"key": "name",
@@ -198,7 +199,7 @@
 								},
 								{
 									"key": "category",
-									"value": "pc",
+									"value": "desktop",
 									"type": "text"
 								},
 								{
@@ -243,7 +244,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "{{accessToken}}",
+								"value": "Bearer {{accessToken}}",
 								"type": "text"
 							}
 						],
@@ -272,23 +273,39 @@
 					"name": "Confirm purcharse",
 					"request": {
 						"method": "POST",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"deliveryTime\": \"2022-08-30 15:51\",\r\n    \"deliveryAddress\": \"Capitan Juan Varela\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "http://{{host}}:{{port}}/products/:id/confirm",
+							"raw": "http://localhost:9000/api/products/1/confirm?email=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImVtYWlsIjoiaGFiZmFrZWx1aXNAeW9wbWFpbC5jb20iLCJpZFByb2R1Y3QiOiIxIn0sImlhdCI6MTY2MTg2Mzk5NSwiZXhwIjoxNjYxODY3NTk1fQ._rncS5WOFgV8t27S1aa-yYAmOndMulru3py5w4Rt4tA",
 							"protocol": "http",
 							"host": [
-								"{{host}}"
+								"localhost"
 							],
-							"port": "{{port}}",
+							"port": "9000",
 							"path": [
+								"api",
 								"products",
-								":id",
+								"1",
 								"confirm"
 							],
-							"variable": [
+							"query": [
 								{
-									"key": "id",
-									"value": null
+									"key": "email",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjp7ImVtYWlsIjoiaGFiZmFrZWx1aXNAeW9wbWFpbC5jb20iLCJpZFByb2R1Y3QiOiIxIn0sImlhdCI6MTY2MTg2Mzk5NSwiZXhwIjoxNjYxODY3NTk1fQ._rncS5WOFgV8t27S1aa-yYAmOndMulru3py5w4Rt4tA"
 								}
 							]
 						}
@@ -344,7 +361,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://{{host}}:{{port}}/api/products/filterBy/category/speaker?minPrice=100&maxPrice=3000&location=pontevedra",
+							"raw": "http://{{host}}:{{port}}/api/products/filterBy/category/speaker?minPrice=100&maxPrice=3000&location=ourense",
 							"protocol": "http",
 							"host": [
 								"{{host}}"
@@ -368,7 +385,7 @@
 								},
 								{
 									"key": "location",
-									"value": "pontevedra"
+									"value": "ourense"
 								}
 							]
 						}
@@ -381,7 +398,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://{{host}}:{{port}}/api/products/filterBy/userId/21",
+							"raw": "http://{{host}}:{{port}}/api/products/filterBy/userId/4?maxPrice=1000",
 							"protocol": "http",
 							"host": [
 								"{{host}}"
@@ -392,7 +409,13 @@
 								"products",
 								"filterBy",
 								"userId",
-								"21"
+								"4"
+							],
+							"query": [
+								{
+									"key": "maxPrice",
+									"value": "1000"
+								}
 							]
 						}
 					},
@@ -404,7 +427,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://{{host}}:{{port}}/api/products/filterBy/bought",
+							"raw": "http://{{host}}:{{port}}/api/products/filterBy/bought?user_id=3",
 							"protocol": "http",
 							"host": [
 								"{{host}}"
@@ -415,6 +438,12 @@
 								"products",
 								"filterBy",
 								"bought"
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "3"
+								}
 							]
 						}
 					},
@@ -605,10 +634,15 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"name\": \"Luis\",\r\n  \"bio\": \"aaaaaaaaaaaaaa\",\r\n  \"status\": \"admin\"\r\n}"
+							"raw": "{\r\n  \"name\": \"Luis\",\r\n  \"bio\": \"aaaaaaaaaaaaaa\",\r\n  \"status\": \"admin\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
 						"url": {
-							"raw": "http://{{host}}:{{port}}/api/users/profile",
+							"raw": "http://{{host}}:{{port}}/api/users/info",
 							"protocol": "http",
 							"host": [
 								"{{host}}"
@@ -617,7 +651,7 @@
 							"path": [
 								"api",
 								"users",
-								"profile"
+								"info"
 							]
 						}
 					},
@@ -664,20 +698,31 @@
 					"name": "Vote users",
 					"request": {
 						"method": "PUT",
-						"header": [],
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
 						"url": {
-							"raw": "http://{{host}}:{{port}}/api//users/score/:",
+							"raw": "http://localhost:9000/api/users/score/1?vote=4",
 							"protocol": "http",
 							"host": [
-								"{{host}}"
+								"localhost"
 							],
-							"port": "{{port}}",
+							"port": "9000",
 							"path": [
 								"api",
-								"",
 								"users",
 								"score",
-								":"
+								"1"
+							],
+							"query": [
+								{
+									"key": "vote",
+									"value": "4"
+								}
 							]
 						}
 					},

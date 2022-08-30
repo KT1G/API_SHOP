@@ -1,13 +1,12 @@
 'use strict'
 
-const Joi = require('joi') // Crear squemas y validar los datos que recibimos
 const v4 = require('uuid').v4 //Generar un id aleatorio
 const fs = require('fs/promises') //Crear el directorio y subir la imagen
 const sharp = require('sharp') //Validar el formato de la imagen
 const path = require('path') //Crear una ruta
 
 const { getConnection } = require('../../../db/db.js') //Necesitamos conectar con la DDBB
-const { generateError, validateProducts } = require('../../../../helpers') //Variable que uso para la Gestion de Errores
+const { generateError, validateUsers } = require('../../../../helpers') //Variable que uso para la Gestion de Errores
 
 // Limites y Ruta para actualizar los datos del usuario pudiendo modificar el nombre y la posibilidad de añadir biografia y avatar.
 const IMG_VALID_FORMATS = ['jpeg', 'png']
@@ -20,26 +19,17 @@ const IMG_FOLDER_PATH = path.join(
     'users'
 )
 
-async function validateNewInfoUser(info) {
-    const schema = Joi.object({
-        name: Joi.string().max(60),
-        bio: Joi.string().max(255),
-        status: Joi.string().max(60).valid('active', 'admin'),
-    })
-    Joi.assert(info, schema) //Validamos si el objeto info cumple con la estructura de schema
-    console.log('Datos validados')
-}
-
-const putUpdateUser = async (req, res, next) => {
+const putUpdateUserInfo = async (req, res, next) => {
     //Recogemos los datos que nos llegan
     const userId = req.claims.userId
+    console.log(userId);
     const payload = { ...req.body }
-
+    console.log(req.body);
     let connection = null
 
     //VALIDAR LOS DATOS
     try {
-        await validateProducts(payload)
+        await validateUsers(payload)
     } catch (error) {
         return res.status(400).send({
             status: 'Bad Request',
@@ -52,7 +42,7 @@ const putUpdateUser = async (req, res, next) => {
         connection = await getConnection()
 
         const { name, bio, status } = payload //Recogemos en variables los datos que nos llegan
-        let query =
+        const query =
             'UPDATE users SET name = ?, bio = ?, status = ? WHERE id = ?' //Query para actualizar el usuario
         const values = [name, bio, status, userId] //Valores para la query
         const [result] = await connection.query(query, values)
@@ -138,4 +128,4 @@ const putUpdateUserAvatar = async (req, res, next) => {
         res.end(0)
     }
 }
-module.exports = { putUpdateUser, putUpdateUserAvatar }
+module.exports = { putUpdateUserInfo, putUpdateUserAvatar }

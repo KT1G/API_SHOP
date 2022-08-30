@@ -7,8 +7,25 @@ const v4 = require('uuid').v4
 const { getConnection } = require('../../../db/db')
 const Joi = require('joi')
 
-const IMG_VALID_FORMATS = ['jpeg', "png"]
-const CATEGORY_VALID = ['desktop', 'notebook', 'tablet', 'smartphone', 'ebook', 'smartwhatch', 'console', 'tv', 'camera', 'mouse', 'keyboard', 'headset', 'speaker', 'printer', 'scanner', 'charger', ]
+const IMG_VALID_FORMATS = ['jpeg', 'png']
+const CATEGORY_VALID = [
+    'desktop',
+    'notebook',
+    'tablet',
+    'smartphone',
+    'ebook',
+    'smartwhatch',
+    'console',
+    'tv',
+    'camera',
+    'mouse',
+    'keyboard',
+    'headset',
+    'speaker',
+    'printer',
+    'scanner',
+    'charger',
+]
 
 const MAX_IMAGE_WIDTH = 600
 const MAX_LIMIT_POST = 10
@@ -114,13 +131,13 @@ async function addNewProduct(req, res, next) {
             connection.release()
         }
         const { publicaciones } = rows[0] || 0
-          if (publicaciones >= MAX_LIMIT_POST) {
+        if (publicaciones >= MAX_LIMIT_POST) {
             return res.status(403).send({
                 status: 'Denied',
                 message: `El limite de publicaciones por usuario son ${MAX_LIMIT_POST}`,
             })
-        } 
- 
+        }
+
         connection.release()
 
         // la ruta total seria =  dir_principal/public/uploads/products/$userId
@@ -152,11 +169,10 @@ async function addNewProduct(req, res, next) {
         connection = await getConnection()
 
         await connection.query(`INSERT INTO products SET ?`, product)
-        const [row] = await connection.query(`SELECT id FROM products ORDER BY created_at DESC LIMIT 1`)
-        
-        const idNewProduct = row[0].id
-        
-        
+        const [row] = await connection.query(`SELECT max(id) AS lastIid FROM products`)
+        console.log(row[0].lastIid);
+
+        const idNewProduct = row[0].lastIid
 
         connection.release()
         res.header(

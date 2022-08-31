@@ -259,12 +259,12 @@ Si el vendedor acepta la compra se le enviará un correo al comprador con los de
 		-Actualizamos en la columna "loves" de "users", el numero de likes dados por los usuarios; al borrar una account desaparecen todas las referencias de las tablas likes, bookings y products. Como consecuencia el usuario tiene menos productos en su lista de likes.
 		-Actualizamos en la columna "likes" de "users", el numero de likes recibidos por el dueño del producto; al borrar el producto desaparecen todas las referencias de las tablas likes, bookings y products. Como consecuencia el usuario tiene menos likes en sus productos.
 
- - **Delete Account By User Id** URL del postman => **/api/products/delete/byUserId/:id**
-   En este endpoint un usuario logeado o que sea **Admin** puede borrar todos sus productoso los de un usuario que no sea **Admin**.
+ - **Delete Products By User Id** URL del postman => **/api/products/delete/byUserId/:id**
+   En este endpoint un usuario logeado o que sea **Admin** puede borrar todos sus productos o los de un usuario que no sea **Admin**.
    
 	Para solicitar el borrado de los productos de 1 usuario debemos introducir la siguiente URL:
 
-	> Ejemplo: http://localhost:9000/apiproducts/delete/byUserId/1
+	> Ejemplo: http://localhost:9000/api/products/delete/byUserId/1
  
 	-***Consecuencias*** :
 		Este borrado tiene las mismas consecuencias que en **Delete Product By Id**
@@ -316,7 +316,7 @@ Si el vendedor acepta la compra se le enviará un correo al comprador con los de
 	> Ejemplo: http://localhost:9000/api/products/update/image/1
  
 	-***Consecuencias*** :
-		Este borrado tiene las mismas consecuencias que en **Update Product Info**
+		Este update tiene las mismas consecuencias que en **Update Product Info**
 
 **VALIDACIONES**
 
@@ -345,4 +345,151 @@ Si el producto ha sido entregado el comprador podrá valorar el producto a trave
 4. - Comprobamos que el usuario solo pueda valorar productos que no le pertenezcan y solo pueda valorar una vez por producto.
 5. - Comprobar que el producto ha sido entregado mirando la hora de entrega y la hora actual. 
 
+------------
 
+- **Update Users**:
+
+ - **Update User Info** URL del postman => **/api/users/update/info**.
+   
+	En este endpoint un usuario **logeado**  puede actualizar su **info** (name, bio, status).
+
+	Los datos llegan por el **body** con el formato **raw** y un objeto tipo **JSON** con los siguientes parametros.
+
+- **"name"**: "David"
+- **"bio"**: "Me llamo David, tengo 25 años y me gustan la consolas retro"
+- **"status"**: "admin"
+   
+   Para solicitar la actualizacion de la info debemos introducir la siguiente URL:
+   
+	> Ejemplo: http://localhost:9000/api/users/update/info
+ 
+	-***Consecuencias*** :
+ 		-Al hacerlo se modifica la "info" de ese usuario en la base de datos.
+
+  - **Update User Avatar** URL del postman => **/api/products/update/image/:id**.
+  
+   En este endpoint un usuario **logeado**  puede actualizar su **avatar**.
+   
+   	Los datos llegan por el **body** con el formato **form data** y tipo **file**.
+
+- **key**: "avatar"
+- **value**: foto.jpg
+
+   Para solicitar la actualizacion del avatar debemos introducir la siguiente URL:
+
+	> Ejemplo: http://localhost:9000/api/users/update/avatar
+ 
+	-***Consecuencias*** :
+		Este update tiene las mismas consecuencias que en **Update User Info**
+
+**VALIDACIONES**
+
+1. - Comprobamos que la URL sea la correcta.
+2. - Comprobamos que el usuario este logueado.
+3. - Validamos los datos que nos llegan por el **body**. Comprobamos que se hayan especificado todos los datos requeridos, y que los datos introducidos sean correctos y estén dentro de las categorías y formatos válidos.
+4. - Procedemos a la actualización.
+
+------------
+
+#### Likes
+
+- **Post like**: URL del postman => **/api/likes/:id**.
+
+En este endpoint un usuario **logeado**  puede publicar un **like** de un producto.
+
+Para publicar un like recibimos por **params** el **id** del producto.
+
+>  Ejemplo: http://localhost:9000/api/likes/3
+
+**VALIDACIONES**
+
+1. - Validamos que la URL sea la correcta.
+2. - Validamos los datos que nos llegan por params sean correctos
+3. - Comprobamos si el producto existe.
+4. - Comprobamos que el producto no le pertenezca al usuario logueado.
+5. - Comprobamos que el producto no tiene like del usuario logueado.
+6. - Procedemos a realizar la peticion.
+7. - Actualizar el numero de likes del producto en la DDBB
+8. - Actualizar el numero de likes que dio el usuario logueado en su columna loves
+9. - Actualizar el numero de likes que recibio el usuario propietario del producto en su columna likes
+------------
+- **Get Likes**:
+ - **Get All Likes** URL del postman => **/api/likes**.
+ Para obtener todos los **likes** debemos introducir la siguiente URL:
+
+	> Ejemplo: http://localhost:9000/api/likes
+ 
+ - **Get Likes By Product Id** URL del postman => **/api/likes/filterBy/productId/:product_id**.
+ 
+   En este endpoint **cualquier** usuario puede ver **todos** los **likes** que tiene un producto.
+   
+   Recibimos por **params** el **id** del producto.
+   
+   Para obtener todos los **likes** de un **producto** debemos introducir la siguiente URL:
+
+	> Ejemplo: http://localhost:9000/api/likes/filterBy/productId/1
+ 
+ - **Get Product By User Id** URL del postman => **/api/likes/filterBy/userId/:user_id**
+ 
+   En este endpoint **cualquier** usuario puede ver **todos** los **likes** que tienen los productos de un usuario.
+   
+   Recibimos por **params** el **id** del usuario dueño de los productos.
+   
+   Para obtener todos los **likes** de los productos de un usuario debemos introducir la siguiente URL:
+
+	> Ejemplo: http://localhost:9000/api/likes/filterBy/userId/4
+ 
+ - **Get Product By Lover Id** URL del postman => **/api/likes/filterBy/loverId/:lover_id**
+ 
+   En este endpoint **cualquier** usuario puede ver **todos** los **likes** que dio un usuario.
+   
+   Recibimos por **params** el **id** del usuario que dio los likes.
+   
+   Para obtener todos los **likes** dados por un usuario debemos introducir la siguiente URL:
+
+	> Ejemplo: http://localhost:9000/api/likes/filterBy/loverId/4
+
+**VALIDACIONES**
+
+1. - Comprobamos que la URL sea la correcta.
+2. - Validamos los datos que nos llegan por params. Comprobamos que los datos sean correctos con una funcion de Validacion.
+3. - Procedemos a realizar la peticion
+
+------------
+- **Delete Likes**:
+
+ - **Delete Likes By Id** URL del postman => **/api/likes/delete/byId/:id**.
+   
+    En este endpoint un usuario logeado puede borrar 1 **like** de un **producto** que haya dado él.
+   
+   Para solicitar el borrado del like debemos introducir la siguiente URL:
+
+	> Ejemplo: http://localhost:9000/api/likes/delete/byId/1
+ 
+	-***Consecuencias*** :
+ 		-Al hacerlo elimina todo el like de la base de datos, esto afecto al total de likes del producto, al total de likes del dueño del producto y al total de loves del usuario logueado.
+		-Actualizamos en la columna "likes" de "products", el numero de likes del producto. El producto tiene menos likes.
+		-Actualizamos en la columna "loves" de "users", el numero de likes dados por el usuario logueado. Como consecuencia el usuario logueado tiene menos productos en su lista de likes.
+		-Actualizamos en la columna "likes" de "users", el numero de likes recibidos por el usuario dueño del productos. Como consecuencia el usuario dueño del producto tiene menos likes en sus productos.
+
+ - **Delete Likes By Product Id** URL del postman => **/api/likes/delete/byProductId/:product_id**
+   En este endpoint un usuario logeado o que sea **Admin** puede borrar todos los likes los de un usuario que no sea **Admin**.
+   
+	Para solicitar el borrado de los productos de 1 usuario debemos introducir la siguiente URL:
+
+	> Ejemplo: http://localhost:9000/api/likes/delete/byProductId/1
+ 
+	-***Consecuencias*** :
+		Este borrado tiene las mismas consecuencias que en **Delete Product By Id**
+
+**VALIDACIONES**
+
+1. - Validamos que la URL sea la correcta.
+2. - Validamos los datos que nos llegan por params, comprobamos que los datos sean correctos con una funcion de Validacion.
+3. - Comprobamos que existe el producto.
+4. - Comprobamos que el producto tiene likes.
+5. - Comprobamos que el usuario esta borrando sus likes.
+6. - Procedemos al borrado del like.
+7. - Actualizamos la columna **likes** de **products**
+8. - Actualizamos la columna **loves** de **users**.
+9. - Actualizamos la columna **likes** de **users**.

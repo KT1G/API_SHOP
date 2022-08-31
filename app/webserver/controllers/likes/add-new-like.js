@@ -40,10 +40,10 @@ const likeProduct = async (req, res, next) => {
 
         if(product.length === 0) {
             throw generateError('Not found. No existe, se compró o se borró el producto', 404)
-        } else if (like.length > 0) {
-            throw generateError('Conflict. Ya has dado like a este producto', 409)
         } else if (product[0].user_id === lover_id) {
             throw generateError('Coflict. No puedes darle like a tu producto', 409)
+        } else if (like.length > 0) {
+            throw generateError('Conflict. Ya has dado like a este producto', 409)
         } else {
             //Insertar el like en la DDBB
             await connection.query(

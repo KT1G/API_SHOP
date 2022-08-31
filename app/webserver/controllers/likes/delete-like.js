@@ -124,7 +124,7 @@ const deleteLikeByProductId = async (req, res, next) => {
         )
 
         if (product.length === 0) {
-            throw generateError('Not found. No existe se compró o se borró el producto', 404)
+            throw generateError('Not found. No existe, se compró o se borró el producto', 404)
         } else if (like.length === 0) {
             throw generateError('Not found. No existe el like', 404)
         } else if (lover.length === 0) {

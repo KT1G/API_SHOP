@@ -17,9 +17,9 @@ const router = express.Router()
 router.put('/users/score/:id', checkAccountSession, putScoreUsers) 
 
 // Actualizar el usuario: name, bio y status
-router.put('/users/info', checkAccountSession, putUpdateUserInfo)
+router.put('/users/update/info', checkAccountSession, putUpdateUserInfo)
 
 // Actualizar el usuario: avatar
-router.put('/users/avatar', checkAccountSession, upload.single('avatar'), putUpdateUserAvatar)
+router.put('/users/update/avatar', checkAccountSession, upload.single('avatar'), putUpdateUserAvatar)
 
 module.exports = router

@@ -37,7 +37,7 @@ A continuación se detallan los diferentes endpoints, tanto su funcionamiento co
 Este endpoint se encarga de la creacion del usuario, para ello devemos enviar por el body con el formato **raw** un objeto tipo **JSON** con los siguientes parametros.
 
 - **name**: "David"
-- **email**: " habfakerbraian@yopmail.com"
+- **email**: " habfakebraian@yopmail.com"
 - **password**: "mypassword"
 
 Si el usuario se crea con éxito se enviará un email de activación al correo especificado.

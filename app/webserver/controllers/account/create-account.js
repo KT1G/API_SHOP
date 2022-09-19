@@ -98,7 +98,7 @@ async function createAccount(req, res, next) {
         // enviamos el correo al usuario para que se active su cuenta
         await sendEmail(accountData.email, token)
 
-        res.status(201).send({
+        return res.status(201).send({
             message: 'se ha enviado un correo para verificar cuenta',
         })
     } catch (e) {

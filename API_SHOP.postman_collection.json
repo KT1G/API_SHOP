@@ -78,7 +78,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://{{host}}:{{port}}/api/accounts/delete/byId/2-3",
+							"raw": "http://{{host}}:{{port}}/api/accounts/delete/byId/2",
 							"protocol": "http",
 							"host": [
 								"{{host}}"
@@ -89,7 +89,7 @@
 								"accounts",
 								"delete",
 								"byId",
-								"2-3"
+								"2"
 							]
 						}
 					},
@@ -535,7 +535,7 @@
 					"response": []
 				},
 				{
-					"name": "Update Products Info",
+					"name": "Put Update Products Info",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -573,7 +573,7 @@
 					"response": []
 				},
 				{
-					"name": "Update Products Image",
+					"name": "Put Update Products Image",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -622,7 +622,7 @@
 			"name": "Users",
 			"item": [
 				{
-					"name": "Put Update User",
+					"name": "Put Update User Info",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -642,7 +642,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://{{host}}:{{port}}/api/users/info",
+							"raw": "http://{{host}}:{{port}}/api/users/update/info",
 							"protocol": "http",
 							"host": [
 								"{{host}}"
@@ -651,6 +651,7 @@
 							"path": [
 								"api",
 								"users",
+								"update",
 								"info"
 							]
 						}
@@ -679,7 +680,7 @@
 							]
 						},
 						"url": {
-							"raw": "http://{{host}}:{{port}}/api/users/avatar",
+							"raw": "http://{{host}}:{{port}}/api/users/update/avatar",
 							"protocol": "http",
 							"host": [
 								"{{host}}"
@@ -688,6 +689,7 @@
 							"path": [
 								"api",
 								"users",
+								"update",
 								"avatar"
 							]
 						}
@@ -745,7 +747,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://{{host}}:{{port}}/api/likes/1",
+							"raw": "http://{{host}}:{{port}}/api/likes/2",
 							"protocol": "http",
 							"host": [
 								"{{host}}"
@@ -754,7 +756,7 @@
 							"path": [
 								"api",
 								"likes",
-								"1"
+								"2"
 							]
 						}
 					},

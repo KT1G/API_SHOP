@@ -45,8 +45,6 @@ async function login(req, res) {
 
     }
 
-
-
     const query = `SELECT id, email, password, status, avatar 
     FROM users WHERE email = ? `
 
@@ -75,7 +73,7 @@ async function login(req, res) {
         if (!isPasswordOk) {
             res.status(401).send({
                 status: 'Unauthorized',
-                message: 'Esa cuenta no esta registrada o la contraseña no son correctos',
+                message: 'Esa cuenta no esta registrada o la contraseña no es correcta',
             })
         }
 
@@ -86,7 +84,7 @@ async function login(req, res) {
         if (user.status === null) {
             res.status(401).send({
                 status: 'Unauthorized',
-                message: 'Debe activar la cuenta o ser administrador para logearse, revise su correo y compruebe la carpeta de SPAM'
+                message: 'Debe activar la cuenta para logearse revise su correo y compruebe la carpeta de SPAM'
             })
         }
 

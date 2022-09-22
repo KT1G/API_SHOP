@@ -58,11 +58,7 @@ async function addNewProduct(req, res, next) {
     /*
      * 1. Validar los datos tanto de la imagen como de las carecteristicas del producto 👌
      * 2. Crear y guardar si no exite la imagen en un disco duro en este caso el pc 👌
-<<<<<<< Updated upstream
      * 3. hacer una query para limitar el numero de publicaciones por usuario👌
-=======
-     * 3. hacer una query para limitar el numero de publicaciones por usuario a 3
->>>>>>> Stashed changes
      * 4. hacer la query a la DDBB e insertar el producto 👌
      * 5. Enviarle a front la ruta completa de la imagen 👌
      */

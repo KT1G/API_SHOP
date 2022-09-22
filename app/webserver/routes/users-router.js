@@ -6,7 +6,8 @@ const multer = require('multer')
 
 const checkAccountSession = require('../controllers/account/check-account.sesssion');
 const putScoreUsers = require('../controllers/users/score-user-controller');
-const {putUpdateUserInfo, putUpdateUserAvatar} = require('../controllers/users/put-update-user')
+const {putUpdateUserInfo, putUpdateUserAvatar} = require('../controllers/users/put-update-user');
+const getUser = require('../controllers/users/get-user');
 
 const upload = multer()
 
@@ -21,5 +22,7 @@ router.put('/users/update/info', checkAccountSession, putUpdateUserInfo)
 
 // Actualizar el usuario: avatar
 router.put('/users/update/avatar', checkAccountSession, upload.single('avatar'), putUpdateUserAvatar)
+
+router.get('/users/',checkAccountSession, getUser)
 
 module.exports = router

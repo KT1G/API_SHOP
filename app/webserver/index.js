@@ -7,8 +7,11 @@ const productsRouter = require('./routes/products-router')
 const usersRuoter = require('./routes/users-router')
 const likesRouter = require('./routes/likes-router')
 const path = require('path')
+const cors = require('cors')
 
 const app = express()
+
+app.use(cors())
 
 app.use(express.static(path.join(process.cwd(), 'public')))// para que se pueda acceder a los archivos estaticos de la carpeta public
 
@@ -21,7 +24,6 @@ app.use('/api', authRouter)
 app.use('/api', productsRouter)
 app.use('/api', usersRuoter)
 app.use('/api', likesRouter)
-
 
 app.use((req, res) => {
     res.status(404).send({

@@ -1,8 +1,8 @@
 'use strict'
 
-const {getToken} = require('../../../../helpers')
+const { getToken } = require('../../../../helpers')
 const joi = require('joi')
-const {getConnection} = require('../../../db/db')
+const { getConnection } = require('../../../db/db')
 const bcrypt = require('bcrypt')
 const v4 = require('uuid').v4
 const mailgun = require('mailgun-js')
@@ -15,8 +15,7 @@ async function validate(payload) {
         password: joi.string().alphanum().min(3).max(30).required(),
     })
 
-    joi
-        .assert(payload, schema)
+    joi.assert(payload, schema)
 }
 
 // funcion para enviar correo al usuario para que se active su cuenta
@@ -41,7 +40,6 @@ async function sendEmail(userEmail, token) {
     })
 }
 
-
 // funcion para crear una cuenta de usuario en la base de datos
 
 async function createAccount(req, res, next) {
@@ -53,7 +51,7 @@ async function createAccount(req, res, next) {
      */
 
     const accountData = {
-        ...req.body
+        ...req.body,
     }
 
     // validamos los datos que nos llegan del req.body
@@ -62,14 +60,15 @@ async function createAccount(req, res, next) {
     } catch (e) {
         return res.status(400).send({
             status: 'bad request',
-            message: 'Los datos introducidos no son correctos o falta algun campo por rellenar',
+            message:
+                'Los datos introducidos no son correctos o falta algun campo por rellenar',
         })
     }
 
-    // creamos los atribustos que nos faltan para generar un nuevo usuario 
+    // creamos los atribustos que nos faltan para generar un nuevo usuario
     const now = new Date()
     const code = v4()
-    
+
     // creamos los atribustos que nos faltan para generar un nuevo token
     const payloadJwt = {
         email: accountData.email,
@@ -98,8 +97,8 @@ async function createAccount(req, res, next) {
         // enviamos el correo al usuario para que se active su cuenta
         await sendEmail(accountData.email, token)
 
-        res.status(201).send({
-            message: 'se ha enviado un correo para verificar cuenta',
+        return res.status(201).send({
+            message: 'Se le ha enviado un correo para activar su cuenta.',
         })
     } catch (e) {
         // en este catch nos aseguramos que no haya un usuario igual en la base de datos y liberamos la conexion por si no la liberamos en el try dado que hubo un error

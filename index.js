@@ -5,12 +5,10 @@ require('dotenv').config()
 // this file is the entry point of the application
 // gonna connect to the database and start the server
 
-const { connect } = require('./app/db/db');
-const { listen } = require('./app/webserver/index');
-const initDB = require("./app/db/initDB");
-const initDBTest = require('./minitest/initDBTest');
-
-
+const { connect } = require('./app/db/db')
+const { listen } = require('./app/webserver/index')
+const initDB = require('./app/db/initDB')
+const initDBTest = require('./minitest/initDBTest')
 
 const port = process.env.PORT
 
@@ -25,8 +23,8 @@ process.on('unhandledRejection', (err) => {
 
 async function initApp() {
     try {
-        await connect();
-        await initDB()
+        await connect()
+        //await initDB()
         //await initDBTest()
         await listen(port)
 

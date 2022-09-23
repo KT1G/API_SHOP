@@ -4,7 +4,12 @@
 const { getConnection } = require('../../../db/db.js')
 
 //Importar del archivo de la ruta ../helpers.js la Variable que uso para la Gestion de Errores
-const { generateError, validateProducts, pagination, createProductFilter, } = require('../../../../helpers')
+const {
+    generateError,
+    validateProducts,
+    pagination,
+    createProductFilter,
+} = require('../../../../helpers')
 
 const MAX_PRODUCTS_PER_PAGE = 10
 
@@ -41,12 +46,12 @@ const getAllProducts = async (req, res, next) => {
             `SELECT COUNT(*) AS total FROM products WHERE status IS NULL`
         )
         totalProducts = totalProducts[0].total
-        console.log(totalProducts);
+        console.log(totalProducts)
         const totalPages = Math.ceil(totalProducts / MAX_PRODUCTS_PER_PAGE)
 
         //Cojo todos los products de la base de datos
         const [allProducts] = await connection.query(
-            `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
+            `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL ORDER BY p.created_at ASC LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
         )
 
         //si no existe ningun product devuelve un error
@@ -59,10 +64,19 @@ const getAllProducts = async (req, res, next) => {
             )
         } else {
             const urlBase = `http://${req.headers.host}/api/products`
-            return res.status(200).send(await pagination(
-                urlBase, page, totalPages, totalProducts, offset, allProducts, queryStrings
+            return res
+                .status(200)
+                .send(
+                    await pagination(
+                        urlBase,
+                        page,
+                        totalPages,
+                        totalProducts,
+                        offset,
+                        allProducts,
+                        queryStrings
+                    )
                 )
-            )
         }
     } catch (error) {
         next(error) //Si llega aqui el error se envia al Middleware de gestion de errores
@@ -72,6 +86,44 @@ const getAllProducts = async (req, res, next) => {
         }
     }
 }
+
+/***************************************************************
+ *************************BY SEARCH*****************************
+ **************************************************************/
+
+const getProductBySuggestions = async (req, res, next) => {
+    let connection = null
+
+    //DATOS DE LA PETICION
+    const data = `$req.params.search`
+    console.log(data)
+    let search = null
+
+    //PARA LA PAGINACION
+    const page = parseInt(req.query.page, 10) || 1 //Pagina recibida por querystring o por defecto 1
+    const offset = (page - 1) * MAX_PRODUCTS_PER_PAGE //Registros que se saltaran
+
+    //VALIDACIONES
+    try {
+        if (data.includes('-')) {
+            search = data.replace('-', ' ')
+            await validateProducts({ search })
+            console.log('datos validados')
+        } else {
+            await validateProducts({ search: data })
+            console.log('datos validados')
+        }
+    } catch (error) {
+        res.status(400).send({
+            status: 'Bad Request',
+            message: error.details[0].message,
+        })
+    }
+
+    //OBTENER LOS ELEMENTOS DE LA BASE DE DATOS
+}
+
+const getProductBySearch = async (req, res, next) => {}
 
 /***************************************************************
  ***************************BY ID*******************************
@@ -118,7 +170,9 @@ const getProductById = async (req, res, next) => {
     try {
         connection = await getConnection()
         //Coger el id mas grande de la base de datos
-        const [maxId] = await connection.query(`SELECT MAX(id) AS maxId FROM products`)
+        const [maxId] = await connection.query(
+            `SELECT MAX(id) AS maxId FROM products`
+        )
         let queryStrings = []
 
         if (dataArray) {
@@ -136,7 +190,7 @@ const getProductById = async (req, res, next) => {
                     }
                 })
             )
-            
+
             if (notExist.length > 0) {
                 notExist = notExist.join(', ')
                 throw generateError(
@@ -152,20 +206,29 @@ const getProductById = async (req, res, next) => {
                 const dataString = dataArray.join(', ')
                 //hacer la busqueda de los productos por id
                 const [products] = await connection.query(
-                    `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.id IN (${dataString}) LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
+                    `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.id IN (${dataString}) LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
                 )
 
                 const urlBase = `http://${req.headers.host}/api/products/filterBy/id/${data}`
-                return res.status(200).send(
-                    await pagination(urlBase,page,totalPages,totalProducts,offset,products,queryStrings
+                return res
+                    .status(200)
+                    .send(
+                        await pagination(
+                            urlBase,
+                            page,
+                            totalPages,
+                            totalProducts,
+                            offset,
+                            products,
+                            queryStrings
+                        )
                     )
-                )
             }
         } else {
             const totalProducts = 1
             const totalPages = Math.ceil(totalProducts / MAX_PRODUCTS_PER_PAGE)
             const [product] = await connection.query(
-                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.id = '${data}' LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
+                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.id = '${data}' LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
             )
             if (product.length === 0) {
                 throw generateError(
@@ -179,10 +242,19 @@ const getProductById = async (req, res, next) => {
                 )
             } else {
                 const urlBase = `http://${req.headers.host}/api/products/filterBy/id/${data}`
-            return res.status(200).send(await pagination(
-                urlBase, page, totalPages, totalProducts, offset, product, queryStrings
-                )
-            )
+                return res
+                    .status(200)
+                    .send(
+                        await pagination(
+                            urlBase,
+                            page,
+                            totalPages,
+                            totalProducts,
+                            offset,
+                            product,
+                            queryStrings
+                        )
+                    )
             }
         }
     } catch (error) {
@@ -226,10 +298,15 @@ const getProductByCategory = async (req, res, next) => {
         connection = await getConnection()
         let conditions = []
         let queryStrings = []
-        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.category = '${category}'`
+        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.category = '${category}'`
 
         //Meter en query, conditions y queryStrings los elementos del objeto que devuelve la funcion createProductFilter
-        const result = await createProductFilter(data,query,queryStrings,conditions)
+        const result = await createProductFilter(
+            data,
+            query,
+            queryStrings,
+            conditions
+        )
         query = result.query
         queryStrings = result.queryStrings
         conditions = result.conditions
@@ -271,10 +348,19 @@ const getProductByCategory = async (req, res, next) => {
             )
         } else {
             const urlBase = `http://${req.headers.host}/api/products/filterBy/category/${category}`
-            return res.status(200).send(await pagination(
-                urlBase, page, totalPages, totalProducts, offset, products, queryStrings
+            return res
+                .status(200)
+                .send(
+                    await pagination(
+                        urlBase,
+                        page,
+                        totalPages,
+                        totalProducts,
+                        offset,
+                        products,
+                        queryStrings
+                    )
                 )
-            )
         }
     } catch (error) {
         next(error) //Si llega aqui el error se envia al Middleware de gestion de errores
@@ -317,10 +403,15 @@ const getProductByUserId = async (req, res, next) => {
         connection = await getConnection()
         let conditions = []
         let queryStrings = []
-        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  user_id = ${user_id}`
+        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  user_id = ${user_id}`
 
         //Meter en query, conditions y queryStrings los elementos del objeto que devuelve la funcion createProductFilter
-        const result = await createProductFilter(data,query,queryStrings,conditions)
+        const result = await createProductFilter(
+            data,
+            query,
+            queryStrings,
+            conditions
+        )
         query = result.query
         queryStrings = result.queryStrings
         conditions = result.conditions
@@ -363,9 +454,19 @@ const getProductByUserId = async (req, res, next) => {
             )
         } else {
             const urlBase = `http://${req.headers.host}/api/products/filterBy/userId/${user_id}`
-            return res.status(200).send(
-                await pagination(urlBase,page,totalPages,totalProducts,offset,products,queryStrings)
-            )
+            return res
+                .status(200)
+                .send(
+                    await pagination(
+                        urlBase,
+                        page,
+                        totalPages,
+                        totalProducts,
+                        offset,
+                        products,
+                        queryStrings
+                    )
+                )
         }
     } catch (error) {
         next(error) //Si llega aqui el error se envia al Middleware de gestion de errores
@@ -407,10 +508,15 @@ const getBoughtProduct = async (req, res, next) => {
         connection = await getConnection()
         let conditions = []
         let queryStrings = []
-        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.likes, p.image, p.caption, u.name AS user_name, u.score AS user_score, p.valoration, p.buyer_id FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status = 'bought'`
+        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.likes, p.user_id, p.image, p.caption, u.name AS user_name, u.score AS user_score, p.valoration, p.buyer_id FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status = 'bought'`
 
         //Meter en query, conditions y queryStrings los elementos del objeto que devuelve la funcion createProductFilter
-        const result = await createProductFilter(data,query,conditions,queryStrings)
+        const result = await createProductFilter(
+            data,
+            query,
+            conditions,
+            queryStrings
+        )
         query = result.query
         conditions = result.conditions
         queryStrings = result.queryStrings
@@ -440,17 +546,29 @@ const getBoughtProduct = async (req, res, next) => {
         console.log(products.length)
         if (products.length === 0) {
             throw generateError(
-                `Not Found. No existen o se borraron los producto con ese filtro`, 404
+                `Not Found. No existen o se borraron los producto con ese filtro`,
+                404
             )
         } else if (page > totalPages) {
             throw generateError(
-                `Not Found. No exite la pagina ${page}, van del 1 al ${totalPages}`, 404
+                `Not Found. No exite la pagina ${page}, van del 1 al ${totalPages}`,
+                404
             )
         } else {
             const urlBase = `http://${req.headers.host}/api/products/filterBy/bought`
-            return res.status(200).send(
-                await pagination(urlBase,page,totalPages,totalProducts,offset,products,queryStrings)
-            )
+            return res
+                .status(200)
+                .send(
+                    await pagination(
+                        urlBase,
+                        page,
+                        totalPages,
+                        totalProducts,
+                        offset,
+                        products,
+                        queryStrings
+                    )
+                )
         }
     } catch (error) {
         next(error)
@@ -461,4 +579,12 @@ const getBoughtProduct = async (req, res, next) => {
     }
 }
 
-module.exports = { getAllProducts, getProductById, getProductByCategory, getProductByUserId, getBoughtProduct, }
+module.exports = {
+    getAllProducts,
+    getProductBySuggestions,
+    getProductBySearch,
+    getProductById,
+    getProductByCategory,
+    getProductByUserId,
+    getBoughtProduct,
+}

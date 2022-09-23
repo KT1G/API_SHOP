@@ -21,10 +21,10 @@ const IMG_FOLDER_PATH = path.join(
 
 const putUpdateUserInfo = async (req, res, next) => {
     //Recogemos los datos que nos llegan
-    const userId = req.claims.userId
-    console.log(userId);
+    const logUserId = req.claims.userId
+    console.log(logUserId)
     const payload = { ...req.body }
-    console.log(req.body);
+    console.log(req.body)
     let connection = null
 
     //VALIDAR LOS DATOS
@@ -44,8 +44,90 @@ const putUpdateUserInfo = async (req, res, next) => {
         const { name, bio, status } = payload //Recogemos en variables los datos que nos llegan
         const query =
             'UPDATE users SET name = ?, bio = ?, status = ? WHERE id = ?' //Query para actualizar el usuario
-        const values = [name, bio, status, userId] //Valores para la query
+        const values = [name, bio, status, logUserId] //Valores para la query
         const [result] = await connection.query(query, values)
+
+        //Comprobar si se ha actualizado el usuario
+        if (result.affectedRows === 0) {
+            throw generateError(
+                `Bad request. No se ha podido actualizar el usuario con id: ${logUserId}`,
+                400
+            )
+        }
+        res.status(200).send(`Usuario con id: ${logUserId} actualizado`)
+    } catch (error) {
+        next(error)
+    } finally {
+        if (connection) {
+            connection.release()
+        }
+        res.end(0)
+    }
+}
+
+const putUpdateUserStatus = async (req, res, next) => {
+    //Recogemos los datos que nos llegan
+    const logUserId = req.claims.userId
+    console.log(logUserId)
+    const userId = req.params.id
+    const payload = { ...req.body, id: userId }
+    console.log(payload)
+    let connection = null
+
+    //VALIDAR LOS DATOS
+    try {
+        await validateUsers(payload)
+    } catch (error) {
+        return res.status(400).send({
+            status: 'Bad Request',
+            message: error.details[0].message,
+        })
+    }
+
+    //ACTUALIZAR EL USUARIO
+    try {
+        connection = await getConnection()
+
+        const { status } = payload //Recogemos en variables los datos que nos llegan
+        const query = 'UPDATE users SET status = ? WHERE id = ?' //Query para actualizar el usuario
+        const values = [status, userId] //Valores para la query
+        let result = []
+
+        // Comprobar si el usuario con userId existe
+        const [user] = await connection.query(
+            'SELECT id FROM users WHERE id = ?',
+            [userId]
+        )
+
+        //Comprobar si el usuario con userId tiene status active
+        const [userStatus] = await connection.query(
+            'SELECT status FROM users WHERE id = ?',
+            [userId]
+        )
+
+        //Comprobar si el usuario con logUserId es admin
+        const [admin] = await connection.query(
+            'SELECT status FROM users WHERE id = ?',
+            [logUserId]
+        )
+
+        if (user.length === 0) {
+            throw generateError(
+                `Not Found. El usuario con id: ${userId} no existe en la base de datos`,
+                404
+            )
+        } else if (userStatus[0].status !== 'active') {
+            throw generateError(
+                `Bad Request. El usuario con id: ${userId} no tiene status active`,
+            )
+        } else if (admin[0].status !== 'admin') {
+            throw generateError(
+                `Bad request. El usuario con id: ${logUserId} no es administrador`,
+                400
+            )
+        } else {
+            result = await connection.query(query, values)
+        }
 
         //Comprobar si se ha actualizado el usuario
         if (result.affectedRows === 0) {
@@ -128,4 +210,4 @@ const putUpdateUserAvatar = async (req, res, next) => {
         res.end(0)
     }
 }
-module.exports = { putUpdateUserInfo, putUpdateUserAvatar }
+module.exports = { putUpdateUserInfo, putUpdateUserStatus, putUpdateUserAvatar }

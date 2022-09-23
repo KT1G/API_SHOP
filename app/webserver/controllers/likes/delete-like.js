@@ -32,7 +32,7 @@ const deleteLikeById = async (req, res, next) => {
         )
         //Comprobar si existe el producto
         const [product] = await connection.query(
-            `SELECT user_id FROM products WHERE status IS NULL AND id = ${like.product_id}`
+            `SELECT user_id FROM products WHERE status IS NULL AND id = ${like[0].product_id}`
         )
         //Comprobar si el like lo ha dado el lover que esta logeado
         const [lover] = await connection.query(

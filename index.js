@@ -7,8 +7,8 @@ require('dotenv').config()
 
 const { connect } = require('./app/db/db');
 const { listen } = require('./app/webserver/index');
-//const initDB = require("./app/db/initDB");
-//const initDBTest = require('./minitest/initDBTest');
+const initDB = require("./app/db/initDB");
+const initDBTest = require('./minitest/initDBTest');
 
 
 
@@ -26,7 +26,7 @@ process.on('unhandledRejection', (err) => {
 async function initApp() {
     try {
         await connect();
-        //await initDB()
+        await initDB()
         //await initDBTest()
         await listen(port)
 

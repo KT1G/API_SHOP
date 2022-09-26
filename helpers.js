@@ -40,10 +40,15 @@ async function validateUsers(payload) {
 
 async function validateProducts(payload) {
     const schema = Joi.object({
+        search: Joi.string().max(255),
         id: Joi.number().integer().positive().min(1),
-        category: Joi.string().max(60).pattern(/^[a-zA-Z\u00C0-\u017F]+$/),
+        category: Joi.string()
+            .max(60)
+            .pattern(/^[a-zA-Z\u00C0-\u017F]+$/),
         name: Joi.string().max(60),
-        location: Joi.string().max(60).pattern(/^[a-zA-Z\u00C0-\u017F]+$/),
+        location: Joi.string()
+            .max(60)
+            .pattern(/^[a-zA-Z\u00C0-\u017F]+$/),
         user_id: Joi.number().integer().positive().min(1),
         price: Joi.number().positive().min(0).max(3500),
         minPrice: Joi.number().integer().positive().min(0),
@@ -79,9 +84,45 @@ async function validateLikes(payload) {
 }
 
 async function createProductFilter(data, query, conditions, queryStrings) {
-    const { category, name, location, user_id, price, minPrice, maxPrice, likes, minLikes, maxLikes, score, minScore, maxScore, valoration, minValoration, maxValoration, buyer_id, } = data
-    
-    if (category || name || location || user_id || price || minPrice || maxPrice || likes || minLikes || maxLikes || score || minScore || maxScore || valoration || minValoration || maxValoration || buyer_id) {
+    const {
+        category,
+        name,
+        location,
+        user_id,
+        price,
+        minPrice,
+        maxPrice,
+        likes,
+        minLikes,
+        maxLikes,
+        score,
+        minScore,
+        maxScore,
+        valoration,
+        minValoration,
+        maxValoration,
+        buyer_id,
+    } = data
+
+    if (
+        category ||
+        name ||
+        location ||
+        user_id ||
+        price ||
+        minPrice ||
+        maxPrice ||
+        likes ||
+        minLikes ||
+        maxLikes ||
+        score ||
+        minScore ||
+        maxScore ||
+        valoration ||
+        minValoration ||
+        maxValoration ||
+        buyer_id
+    ) {
         if (category) {
             conditions.push(`category = '${category}'`)
             queryStrings.push(`category=${category}`)
@@ -151,22 +192,50 @@ async function createProductFilter(data, query, conditions, queryStrings) {
             queryStrings.push(`buyer_id=${buyer_id}`)
         }
         query = `${query} AND ${conditions.join(' AND ')}`
-    } 
-    
+    }
+
     return { query, conditions, queryStrings }
 }
 
-async function pagination(urlBase, page, totalPages, totalObject, offset, object, queryStrings) {
+async function pagination(
+    urlBase,
+    page,
+    totalPages,
+    totalObject,
+    offset,
+    object,
+    queryStrings
+) {
     if (queryStrings.length > 0) {
-        const prevPage = page > 1 ? `${urlBase}?page=${page - 1}&${queryStrings.join('&')}` : null
+        const prevPage =
+            page > 1
+                ? `${urlBase}?page=${page - 1}&${queryStrings.join('&')}`
+                : null
         const currentPage = `${urlBase}?page=${page}&${queryStrings.join('&')}`
-        const nextPage = page < totalPages ? `${urlBase}?page=${page + 1}&${queryStrings.join('&')}` : null
+        const nextPage =
+            page < totalPages
+                ? `${urlBase}?page=${page + 1}&${queryStrings.join('&')}`
+                : null
         const firstPage = `${urlBase}?page=1&${queryStrings.join('&')}`
-        const lastPage = `${urlBase}?page=${totalPages}&${queryStrings.join('&')}`
+        const lastPage = `${urlBase}?page=${totalPages}&${queryStrings.join(
+            '&'
+        )}`
         const pageView = `Pagina: ${page} de ${totalPages}`
-        const productsView = `Productos: ${offset + 1} al ${offset + object.length}, de ${totalObject}`
+        const productsView = `Productos: ${offset + 1} al ${
+            offset + object.length
+        }, de ${totalObject}`
         //Objeto info con los datos de la pagina
-        const info = { prevPage, currentPage, nextPage, firstPage, lastPage, totalObject, totalPages, pageView, productsView }
+        const info = {
+            prevPage,
+            currentPage,
+            nextPage,
+            firstPage,
+            lastPage,
+            totalObject,
+            totalPages,
+            pageView,
+            productsView,
+        }
         const result = { info, object }
 
         //Si todo va bien. Devolvemos los productos y la info de la paginación
@@ -174,13 +243,26 @@ async function pagination(urlBase, page, totalPages, totalObject, offset, object
     } else {
         const prevPage = page > 1 ? `${urlBase}?page=${page - 1}` : null
         const currentPage = `${urlBase}?page=${page}`
-        const nextPage = page < totalPages ? `${urlBase}?page=${page + 1}` : null
+        const nextPage =
+            page < totalPages ? `${urlBase}?page=${page + 1}` : null
         const firstPage = `${urlBase}?page=1`
         const lastPage = `${urlBase}?page=${totalPages}`
         const pageView = `Pagina: ${page} de ${totalPages}`
-        const productsView = `Productos: ${offset + 1} al ${offset + object.length}, de ${totalObject}`
+        const productsView = `Productos: ${offset + 1} al ${
+            offset + object.length
+        }, de ${totalObject}`
         //objeto info con los datos de la pagina
-        const info = { prevPage, currentPage, nextPage, firstPage, lastPage, totalObject, totalPages, pageView, productsView }
+        const info = {
+            prevPage,
+            currentPage,
+            nextPage,
+            firstPage,
+            lastPage,
+            totalObject,
+            totalPages,
+            pageView,
+            productsView,
+        }
         const result = { info, object }
 
         //Si todo va bien. Devolvemos los products y la info de la paginación
@@ -188,4 +270,13 @@ async function pagination(urlBase, page, totalPages, totalObject, offset, object
     }
 }
 
-module.exports = { generateError, getToken, getTokenData, validateUsers, validateProducts, validateLikes, createProductFilter, pagination }
+module.exports = {
+    generateError,
+    getToken,
+    getTokenData,
+    validateUsers,
+    validateProducts,
+    validateLikes,
+    createProductFilter,
+    pagination,
+}

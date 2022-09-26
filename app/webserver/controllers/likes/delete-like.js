@@ -13,8 +13,8 @@ const { generateError, validateLikes } = require('../../../../helpers.js')
 const deleteLikeById = async (req, res, next) => {
     const id = req.params.id
     console.log(id)
-    const lover_id = req.claims.userId
-    console.log(lover_id)
+    const logUser_id = req.claims.userId
+    console.log(logUser_id)
     try {
         await validateLikes({ id })
     } catch (error) {
@@ -32,15 +32,18 @@ const deleteLikeById = async (req, res, next) => {
         )
         //Comprobar si existe el producto
         const [product] = await connection.query(
-            `SELECT user_id FROM products WHERE status IS NULL AND id = ${like.product_id}`
+            `SELECT user_id FROM products WHERE status IS NULL AND id = ${like[0].product_id}`
         )
         //Comprobar si el like lo ha dado el lover que esta logeado
         const [lover] = await connection.query(
-            `SELECT id FROM likes WHERE id = ${id} AND lover_id = ${lover_id}`
+            `SELECT id FROM likes WHERE id = ${id} AND lover_id = ${logUser_id}`
         )
 
         if (product.length === 0) {
-            throw generateError('Not found. No existe, se compró o se borró el producto', 404)
+            throw generateError(
+                'Not found. No existe, se compró o se borró el producto',
+                404
+            )
         } else if (like.length === 0) {
             throw generateError('Not found. No existe el like', 404)
         } else if (lover.length === 0) {
@@ -57,11 +60,11 @@ const deleteLikeById = async (req, res, next) => {
             )
             //Calcular el nuevo numero de likes que tiene el lover
             const [totalLoves] = await connection.query(
-                `Select COUNT(*) as loves FROM likes WHERE lover_id = ${lover_id}`
+                `Select COUNT(*) as loves FROM likes WHERE lover_id = ${logUser_id}`
             )
             //Calcular el nuevo numero de likes que tiene el usuario dueño del producto
             const [totalUserLikes] = await connection.query(
-                `Select COUNT(*) as userLikes FROM likes WHERE product_id = ${like[0].product_id} AND user_id = ${product[0].user_id}`
+                `Select COUNT(*) as userLikes FROM likes WHERE user_id = ${product[0].user_id}`
             )
 
             //Actualizar los likes del producto
@@ -70,7 +73,7 @@ const deleteLikeById = async (req, res, next) => {
             )
             //Actualizar los likes del lover
             await connection.query(
-                `UPDATE users SET loves = ${totalLoves[0].loves} WHERE id = ${lover_id}`
+                `UPDATE users SET loves = ${totalLoves[0].loves} WHERE id = ${logUser_id}`
             )
             //Actualizar los likes del usuario dueño del producto
             await connection.query(
@@ -124,7 +127,10 @@ const deleteLikeByProductId = async (req, res, next) => {
         )
 
         if (product.length === 0) {
-            throw generateError('Not found. No existe, se compró o se borró el producto', 404)
+            throw generateError(
+                'Not found. No existe, se compró o se borró el producto',
+                404
+            )
         } else if (like.length === 0) {
             throw generateError('Not found. No existe el like', 404)
         } else if (lover.length === 0) {

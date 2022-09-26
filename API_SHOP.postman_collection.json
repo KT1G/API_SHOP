@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "6556cd0d-210c-4791-9d39-7d3282a16de8",
+		"_postman_id": "543c0f71-b87a-4033-9d63-f00698258e33",
 		"name": "API_SHOP",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "21959476"
@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"luis\",\n    \"email\": \"habfakeluis@yopmail.com\",\n    \"password\":\"mypassword\"\n}",
+							"raw": "{\n    \"name\": \"Braian\",\n    \"email\": \"habfakebraian@yopmail.com\",\n    \"password\":\"mypassword\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -78,7 +78,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://{{host}}:{{port}}/api/accounts/delete/byId/2",
+							"raw": "http://{{host}}:{{port}}/api/accounts/delete/byId/2-3",
 							"protocol": "http",
 							"host": [
 								"{{host}}"
@@ -89,7 +89,7 @@
 								"accounts",
 								"delete",
 								"byId",
-								"2"
+								"2-3"
 							]
 						}
 					},
@@ -190,7 +190,7 @@
 								{
 									"key": "image",
 									"type": "file",
-									"src": "/C:/Users/Usuario/Desktop/Programacion/Curso_HackABoss/Proyectos/Tienda/API_SHOP/logo/logo.png"
+									"src": "/C:/Users/Usuario/Desktop/fotos_tweet/wallapop.png"
 								},
 								{
 									"key": "name",
@@ -634,7 +634,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n  \"name\": \"Luis\",\r\n  \"bio\": \"aaaaaaaaaaaaaa\",\r\n  \"status\": \"admin\"\r\n}",
+							"raw": "{\r\n  \"name\": \"Luis\",\r\n  \"bio\": \"aaaaaaaaaaaaaa\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -653,6 +653,44 @@
 								"users",
 								"update",
 								"info"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Put Update User Status",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{accessToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"status\": \"active\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://{{host}}:{{port}}/api/users/update/status/7",
+							"protocol": "http",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"api",
+								"users",
+								"update",
+								"status",
+								"7"
 							]
 						}
 					},
@@ -747,7 +785,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://{{host}}:{{port}}/api/likes/2",
+							"raw": "http://{{host}}:{{port}}/api/likes/1",
 							"protocol": "http",
 							"host": [
 								"{{host}}"
@@ -756,7 +794,7 @@
 							"path": [
 								"api",
 								"likes",
-								"2"
+								"1"
 							]
 						}
 					},

@@ -246,7 +246,7 @@ const getLikesByLoverId = async (req, res, next) => {
 
         const totalPages = Math.ceil(totalLikes / MAX_LIKES_PER_PAGE)
         const [likes] = await connection.query(
-            `SELECT id, product_id, user_id, lover_id FROM likes WHERE lover_id = ${lover_id} LIMIT ${MAX_LIKES_PER_PAGE} OFFSET ${offset}`
+            `SELECT p.id, p.image, p.price, p.name, p.caption, p.user_id FROM Likes l RIGHT JOIN products p ON l.product_id=p.id WHERE lover_id = ${lover_id} LIMIT ${MAX_LIKES_PER_PAGE} OFFSET ${offset}`
         )
 
         if (totalLikes === 0) {

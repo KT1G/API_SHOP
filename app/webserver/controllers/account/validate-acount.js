@@ -26,7 +26,7 @@ async function validateAccount(req, res) {
     let connection = null
     try {
         connection = await getConnection()
-        const payload = await getTokenData(authorization)
+        const payload = getTokenData(authorization)
 
         // recuperamos del payload el email del usuario y el code
         const data = {
@@ -39,12 +39,19 @@ async function validateAccount(req, res) {
             'SELECT id, email, code, status FROM users WHERE email = ?',
             data.email
         )
+        // comprobamos que el usuario no este ya activado
+        if (user[0].status === 'active') {
+                return res.status(200).send({
+                status: 'bad request',
+                message: 'La cuenta ya está activada ',
+            })
+        }
 
         // comprobamos que exita usuario
         if (!user) {
-            res.status(400).send({
+            return res.status(400).send({
                 sucess: false,
-                message: 'el usuario no existe',
+                message: 'El usuario no existe',
             })
         }
 
@@ -52,15 +59,7 @@ async function validateAccount(req, res) {
         if (user[0].code !== data.code) {
             return res.status(401).send({
                 sucess: false,
-                message: 'el codigo no coincide',
-            })
-        }
-
-        // comprobamos que el usuario no este ya activado
-        if (user[0].status === 'active') {
-            res.status(400).send({
-                status: 'bad request',
-                message: ' el usuario ya esta activado',
+                message: 'El codigo no coincide',
             })
         }
 
@@ -72,7 +71,7 @@ async function validateAccount(req, res) {
         await connection.execute(query, [active, user[0].id])
         connection.release()
 
-        res.status(201).send({
+        return res.status(201).send({
             status: 'created',
             message: 'La cuenta ha sido activada con exito',
         })

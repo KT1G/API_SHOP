@@ -29,7 +29,7 @@ async function sendEmail(userEmail, token) {
         to: userEmail,
         subject: 'Bienvenido',
         html: `<h2>copie el siguiente enlace en el postman para verificar o directamente en el navegador </h2>
-            <p> http://localhost:9000/api/accounts/confirm/${token}</p>
+            <p>http://localhost:3000/accounts/confirm/${token}</p>
              `,
     }
     mg.messages().send(data, (error, body) => {

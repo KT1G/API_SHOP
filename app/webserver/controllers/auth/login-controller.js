@@ -107,7 +107,11 @@ async function login(req, res) {
             expiresIn:3600,
         }
 
-        res.send(userSession)
+        res.status(200).send({
+            status: 'ok',
+            data: userSession
+        })
+
 
 
     } catch (e) {

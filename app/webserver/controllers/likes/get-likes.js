@@ -46,7 +46,7 @@ const getAllLikes = async (req, res, next) => {
         )
 
         if (totalLikes === 0) {
-            throw generateError('Not found. No hay likes', 404)
+            throw generateError('No tienes favoritos', 404)
         } else if (page > totalPages) {
             throw generateError(
                 `Not found. No existe la pagina ${page}, van del 1 al ${totalPages}`,
@@ -250,7 +250,7 @@ const getLikesByLoverId = async (req, res, next) => {
         )
 
         if (totalLikes === 0) {
-            throw generateError('Not found. No hay likes', 404)
+            throw generateError('No tienes productos en favoritos', 404)
         } else if (page > totalPages) {
             throw generateError(
                 `Not found. No existe la pagina ${page}, van del 1 al ${totalPages}`,

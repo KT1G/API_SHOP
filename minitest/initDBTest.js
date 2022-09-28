@@ -144,18 +144,11 @@ async function initDBTest() {
             'notebook',
             'tablet',
             'smartphone',
-            'ebook',
             'smartwhatch',
             'console',
             'tv',
-            'camera',
-            'mouse',
             'keyboard',
             'headset',
-            'speaker',
-            'printer',
-            'scanner',
-            'charger',
         ]
 
         const locations = [

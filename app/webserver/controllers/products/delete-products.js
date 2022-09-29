@@ -13,7 +13,12 @@ const { getConnection } = require('../../../db/db.js')
 const { generateError, validateProducts } = require('../../../../helpers.js')
 
 const PROJECT_MAIN_FOLDER_PATH = process.cwd()
-const PRODUCTS_FOLDER_PATH = path.join(PROJECT_MAIN_FOLDER_PATH, 'public', 'uploads', 'products')
+const PRODUCTS_FOLDER_PATH = path.join(
+    PROJECT_MAIN_FOLDER_PATH,
+    'public',
+    'uploads',
+    'products'
+)
 
 /***************************************************************
  ***************************BY ID*******************************
@@ -86,7 +91,10 @@ const deleteProductById = async (req, res, next) => {
                     notExist.push(idArray[i])
                 } else if (adminProductUser.length !== 0) {
                     adminProduct.push(idArray[i])
-                } else if (userIdProduct !== logUserId && user[0].status !== 'admin') {
+                } else if (
+                    userIdProduct !== logUserId &&
+                    user[0].status !== 'admin'
+                ) {
                     notDelete.push(idArray[i])
                 } else {
                     deleteProducts.push(idArray[i])
@@ -124,16 +132,30 @@ const deleteProductById = async (req, res, next) => {
 
                     //Creo la ruta del archivo a borrar
                     const imageProductPath = path.join(
-                        PRODUCTS_FOLDER_PATH, product[0].user_id.toString(),product[0].image
+                        PRODUCTS_FOLDER_PATH,
+                        product[0].user_id.toString(),
+                        product[0].image
                     )
 
                     //Borrar el archivo products/${userIdProduct}/image si existe
-                    if (fs.access(imageProductPath)) { fs.rm(imageProductPath, { recursive: true }) }
+                    if (fs.access(imageProductPath)) {
+                        fs.rm(imageProductPath, { recursive: true })
+                    }
                     //Borrar el producto de la base de datos
-                    await connection.query(`DELETE FROM products WHERE id = (${id})`)
-                    
+                    await connection.query(
+                        `DELETE FROM products WHERE id = (${id})`
+                    )
+
                     //Actualizar los likes de cada dueño de un producto borrado
                     product.map(async (user_id) => {
+                        //Recuperar el total de productos que tiene el usuario
+                        const [totalProducts] = await connection.query(
+                            `SELECT COUNT(*) AS total FROM products WHERE status IS NULL AND user_id=${user_id}`
+                        )
+                        //Actualizar el total de productos que tiene el usuario
+                        await connection.query(
+                            `UPDATE users SET products=${totalProducts[0].total} WHERE id=${user_id}`
+                        )
                         //Calcular los likes del dueño del producto
                         const [likes] = await connection.query(
                             `SELECT COUNT(id) AS likes FROM products WHERE user_id=${user_id}`
@@ -155,10 +177,11 @@ const deleteProductById = async (req, res, next) => {
                         )
                     })
                 })
-                
-                res.status(200).send('Productos e imágenes borrados, loves y likes actualizados')
+
+                res.status(200).send(
+                    'Productos e imágenes borrados, loves y likes actualizados'
+                )
             }
-            
         } else {
             //Comprobamos que exista el producto
             const [product] = await connection.query(
@@ -194,19 +217,38 @@ const deleteProductById = async (req, res, next) => {
                     `Forbidden. El producto con id: ${id} es de un admin, no se puede borrar`,
                     403
                 )
-            } else if (userIdProduct !== logUserId && user[0].status !== 'admin') {
+            } else if (
+                userIdProduct !== logUserId &&
+                user[0].status !== 'admin'
+            ) {
                 throw generateError(
                     `Forbidden. El producto con id: ${id} no se puede borrar porque no eres el dueño ni tienes permisos de administrador`,
                     403
                 )
             } else {
                 //Crear la ruta para el archivo products/${userIdProduct}/image
-                const imageProductPath = path.join(PRODUCTS_FOLDER_PATH, userIdProduct.toString(), image)
+                const imageProductPath = path.join(
+                    PRODUCTS_FOLDER_PATH,
+                    userIdProduct.toString(),
+                    image
+                )
 
                 //Borrar el archivo products/${userIdProduct}/image si existe
-                if (fs.access(imageProductPath)) { fs.rm(imageProductPath, { recursive: true }) }
+                if (fs.access(imageProductPath)) {
+                    fs.rm(imageProductPath, { recursive: true })
+                }
                 //Borrar el producto de la base de datos
                 await connection.query(`DELETE FROM products WHERE id=${id}`)
+
+                //Recuperar el total de productos que tiene el usuario
+                const [totalProducts] = await connection.query(
+                    `SELECT COUNT(*) AS total FROM products WHERE status IS NULL AND user_id=${userIdProduct}`
+                )
+                console.log(totalProducts[0].total)
+                //Actualizar el total de productos que tiene el usuario
+                await connection.query(
+                    `UPDATE users SET products=${totalProducts[0].total} WHERE id=${userIdProduct}`
+                )
 
                 //Actualizar los likes del dueño del producto borrado
                 //Calcular los likes del dueño del producto
@@ -219,18 +261,20 @@ const deleteProductById = async (req, res, next) => {
                 )
 
                 //Actualizar los loves de cada lover_id
-                    lover.map(async (lover_id) => {
-                        const [loves] = await connection.query(
-                            `SELECT COUNT(id) AS loves FROM likes WHERE lover_id=${lover_id}`
-                        )
-                        //Actualizar los loves de cada lover_id
-                        await connection.query(
-                            `UPDATE users SET loves=${loves[0].loves} WHERE id=${lover_id}`
-                        )
-                    })
+                lover.map(async (lover_id) => {
+                    const [loves] = await connection.query(
+                        `SELECT COUNT(id) AS loves FROM likes WHERE lover_id=${lover_id}`
+                    )
+                    //Actualizar los loves de cada lover_id
+                    await connection.query(
+                        `UPDATE users SET loves=${loves[0].loves} WHERE id=${lover_id}`
+                    )
+                })
             }
             //Si todo fue bien
-            res.status(200).send('Producto e imagen borrados, loves y likes actualizados')
+            res.status(200).send(
+                'Producto e imagen borrados, loves y likes actualizados'
+            )
         }
     } catch (error) {
         next(error) //Si llega aqui el error se envia al Middleware de gestion de errores
@@ -271,7 +315,7 @@ const deleteAllProductByUserID = async (req, res, next) => {
         const [products] = await connection.query(
             `SELECT id FROM products WHERE user_id = ${user_id}`
         )
-        
+
         //Comprobar si el usuario del que se quieren borrar los productos es admin
         const [admin] = await connection.query(
             `SELECT status FROM users WHERE id = ${user_id}`
@@ -298,7 +342,7 @@ const deleteAllProductByUserID = async (req, res, next) => {
                 403
             )
         } else {
-            const products_id = products.map(product => product.id)
+            const products_id = products.map((product) => product.id)
             products_id.map(async (id) => {
                 //Comprobamos que exista el producto
                 const [product] = await connection.query(
@@ -308,16 +352,22 @@ const deleteAllProductByUserID = async (req, res, next) => {
                 const [lover] = await connection.query(
                     `SELECT lover_id FROM likes WHERE product_id=${id}`
                 )
-                
+
                 //Creo la ruta del archivo a borrar
                 const imageProductPath = path.join(
-                    PRODUCTS_FOLDER_PATH, product[0].user_id.toString(), product[0].image
+                    PRODUCTS_FOLDER_PATH,
+                    product[0].user_id.toString(),
+                    product[0].image
                 )
 
                 //Borrar el archivo products/${userIdProduct}/image si existe
-                if (fs.access(imageProductPath)) { fs.rm(imageProductPath, { recursive: true }) }
+                if (fs.access(imageProductPath)) {
+                    fs.rm(imageProductPath, { recursive: true })
+                }
                 //Borrar el producto de la base de datos
-                await connection.query(`DELETE FROM products WHERE id = (${id})`)
+                await connection.query(
+                    `DELETE FROM products WHERE id = (${id})`
+                )
 
                 //Actualizar los loves de cada lover_id
                 lover.map(async (lover_id) => {
@@ -330,7 +380,16 @@ const deleteAllProductByUserID = async (req, res, next) => {
                     )
                 })
             })
-            
+
+            //Recuperar el total de productos que tiene el usuario
+            const [totalProducts] = await connection.query(
+                `SELECT COUNT(*) AS total FROM products WHERE status IS NULL user_id=${user_id}`
+            )
+            //Actualizar el total de productos que tiene el usuario
+            await connection.query(
+                `UPDATE users SET products=${totalProducts[0].total} WHERE id=${user_id}`
+            )
+
             //Calcular los likes del dueño del producto
             const [likes] = await connection.query(
                 `SELECT COUNT(id) AS likes FROM products WHERE user_id=${user_id}`
@@ -339,8 +398,10 @@ const deleteAllProductByUserID = async (req, res, next) => {
             await connection.query(
                 `UPDATE users SET likes=${likes[0].likes} WHERE id=${user_id}`
             )
-            
-            res.status(200).send('Productos e imagenes borrados, loves y likes actualizados')
+
+            res.status(200).send(
+                'Productos e imagenes borrados, loves y likes actualizados'
+            )
         }
     } catch (error) {
         next(error) //Si llega aqui el error se envia al Middleware de gestion de errores
@@ -361,9 +422,7 @@ const deleteAllProductByAdmin = async (req, res, next) => {
         connection = await getConnection()
         //let deleteProducts = []
 
-        const [products] = await connection.query(
-            `SELECT id FROM products`
-        )
+        const [products] = await connection.query(`SELECT id FROM products`)
         //Compruebo que el usuario tiene status admin
         const [logUser] = await connection.query(
             `SELECT status FROM users WHERE id = ${logUserId}`
@@ -372,27 +431,30 @@ const deleteAllProductByAdmin = async (req, res, next) => {
         const [usersNoAdmin] = await connection.query(
             `SELECT id FROM users WHERE status = 'active'`
         )
-        console.log(usersNoAdmin.length);
+        console.log(usersNoAdmin.length)
         /* const [productsNoBooking] = await connection.query(
             `SELECT id FROM products WHERE status IS NULL`
         ) */
 
         if (products.length === 0) {
-            throw generateError(`Not found. No hay productos para borrar`, 404 )
+            throw generateError(`Not found. No hay productos para borrar`, 404)
         } /* else if (productsNoBooking.length === 0) {
             throw generateError('Not found. No hay productos para borrar que no estén en bookings', 404)
-        }  */else if (logUser[0].status !== 'admin') {
-            throw generateError('Forbidden. No tienes permisos de administrador para borrar productos de otros usuarios', 403)
+        }  */ else if (logUser[0].status !== 'admin') {
+            throw generateError(
+                'Forbidden. No tienes permisos de administrador para borrar productos de otros usuarios',
+                403
+            )
         } else {
-            const usersNoAdmin_id = usersNoAdmin.map(user => user.id)
-            console.log(usersNoAdmin_id);
+            const usersNoAdmin_id = usersNoAdmin.map((user) => user.id)
+            console.log(usersNoAdmin_id)
             usersNoAdmin_id.map(async (id) => {
                 const [products] = await connection.query(
                     `SELECT id FROM products WHERE user_id = ${id}`
                 )
-                console.log(products.length);
+                console.log(products.length)
                 if (products.length > 0) {
-                    const products_id = products.map(product => product.id)
+                    const products_id = products.map((product) => product.id)
                     products_id.map(async (id) => {
                         const [product] = await connection.query(
                             `SELECT user_id, image FROM products p WHERE p.id=${id}`
@@ -402,12 +464,18 @@ const deleteAllProductByAdmin = async (req, res, next) => {
                             `SELECT lover_id FROM likes WHERE product_id=${id}`
                         )
                         const imageProductPath = path.join(
-                            PRODUCTS_FOLDER_PATH, product[0].user_id.toString(), product[0].image
+                            PRODUCTS_FOLDER_PATH,
+                            product[0].user_id.toString(),
+                            product[0].image
                         )
                         //Borrar el archivo products/${userIdProduct}/image si existe
-                        if (fs.access(imageProductPath)) { fs.rm(imageProductPath, { recursive: true }) }
+                        if (fs.access(imageProductPath)) {
+                            fs.rm(imageProductPath, { recursive: true })
+                        }
                         //Borrar el producto de la base de datos
-                        await connection.query(`DELETE FROM products WHERE id = (${id})`)
+                        await connection.query(
+                            `DELETE FROM products WHERE id = (${id})`
+                        )
                         //Actualizar los loves de cada lover_id
                         lover.map(async (lover_id) => {
                             const [loves] = await connection.query(
@@ -428,11 +496,16 @@ const deleteAllProductByAdmin = async (req, res, next) => {
                         `UPDATE users SET likes=${likes[0].likes} WHERE id=${id}`
                     )
                 } else {
-                    throw generateError(`Not found. No hay productos para borrar`, 404)
+                    throw generateError(
+                        `Not found. No hay productos para borrar`,
+                        404
+                    )
                 }
             })
 
-            res.status(200).send('Productos e imágenes borrados, likes y loves actualizados')
+            res.status(200).send(
+                'Productos e imágenes borrados, likes y loves actualizados'
+            )
         }
     } catch (error) {
         next(error) //Si llega aqui el error se envia al Middleware de gestion de errores
@@ -443,6 +516,8 @@ const deleteAllProductByAdmin = async (req, res, next) => {
     }
 }
 
-
-
-module.exports = { deleteProductById, deleteAllProductByUserID, deleteAllProductByAdmin }
+module.exports = {
+    deleteProductById,
+    deleteAllProductByUserID,
+    deleteAllProductByAdmin,
+}

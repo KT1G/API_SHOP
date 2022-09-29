@@ -22,7 +22,7 @@ async function initDB(req, res, next) {
             throw generateError('No hay conexión a la base de datos', 500)
         }
 
-        console.log('Borrando el directorio de fotos 🖼️');
+        console.log('Borrando el directorio de fotos 🖼️')
         //borrar la ruta ./public que contiene las imagenes de los productos y los usuarios
         if (fs.access(PUBLIC_FOLDER_PATH)) {
             fs.rm(PUBLIC_FOLDER_PATH, { recursive: true })
@@ -50,6 +50,8 @@ async function initDB(req, res, next) {
                 bio VARCHAR(255) NULL,
                 loves INT NULL DEFAULT 0,
                 likes INT NULL DEFAULT 0,
+                products INT NULL DEFAULT 0,
+                votes INT NULL DEFAULT 0,
                 PRIMARY KEY (id),
                 UNIQUE INDEX email_UNIQUE (email)
             );
@@ -104,15 +106,12 @@ async function initDB(req, res, next) {
         console.log('Nuevas tablas creadas! 👌')
         console.log('Database initialized')
     } catch (error) {
-        next (error)
+        next(error)
     } finally {
         if (connection) {
             connection.release()
         }
     }
 }
-
-
-
 
 module.exports = initDB

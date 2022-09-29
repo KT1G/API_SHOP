@@ -14,7 +14,7 @@ const CATEGORY_VALID = [
     'tablet',
     'smartphone',
     'ebook',
-    'smartwhatch',
+    'smartwatch',
     'console',
     'tv',
     'camera',
@@ -165,10 +165,21 @@ async function addNewProduct(req, res, next) {
         connection = await getConnection()
 
         await connection.query(`INSERT INTO products SET ?`, product)
-        const [row] = await connection.query(`SELECT max(id) AS lastIid FROM products`)
-        console.log(row[0].lastIid);
+        const [row] = await connection.query(
+            `SELECT max(id) AS lastIid FROM products`
+        )
+        console.log(row[0].lastIid)
 
         const idNewProduct = row[0].lastIid
+
+        //Recuperar el total de productos que tiene el usuario
+        const [totalProducts] = await connection.query(
+            `SELECT COUNT(*) AS total FROM products WHERE status IS NULL AND user_id = ${userId}`
+        )
+        //actualizar el total de productos del usuario
+        await connection.query(
+            `UPDATE users SET products = ${totalProducts[0].total} WHERE id = ${userId}`
+        )
 
         connection.release()
         res.header(

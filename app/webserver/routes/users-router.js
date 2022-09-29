@@ -3,9 +3,9 @@
 const express = require('express')
 const multer = require('multer')
 
-const checkAccountSession = require('../controllers/account/check-account.sesssion');
-const putScoreUsers = require('../controllers/users/score-user-controller');
-const getUser = require('../controllers/users/get-user');
+const checkAccountSession = require('../controllers/account/check-account.sesssion')
+const putScoreUsers = require('../controllers/users/score-user-controller')
+const { getUser, getOwnerUser } = require('../controllers/users/get-user')
 const {
     putUpdateUserInfo,
     putUpdateUserAvatar,
@@ -26,7 +26,9 @@ router.put('/users/update/info', checkAccountSession, putUpdateUserInfo)
 // Actualizar el status del usuario
 router.put('/users/update/status/:id', checkAccountSession, putUpdateUserStatus)
 
-router.get('/users/',checkAccountSession, getUser)
+router.get('/users/', checkAccountSession, getUser)
+
+router.get('/users/filterBy/id/:id', getOwnerUser)
 
 module.exports = router
 // Actualizar el usuario: avatar

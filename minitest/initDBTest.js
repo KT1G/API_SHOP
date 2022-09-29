@@ -50,6 +50,8 @@ async function initDBTest() {
                 bio VARCHAR(255) NULL,
                 loves INT NULL DEFAULT 0,
                 likes INT NULL DEFAULT 0,
+                products INT NULL DEFAULT 0,
+                votes INT NULL DEFAULT 0,
                 PRIMARY KEY (id),
                 UNIQUE INDEX email_UNIQUE (email)
             );
@@ -117,7 +119,7 @@ async function initDBTest() {
                     email,
                     `${await bcrypt.hash(password, 8)}`,
                     code,
-                    'active'
+                    'active',
                 ]
             )
         }
@@ -144,9 +146,8 @@ async function initDBTest() {
             'notebook',
             'tablet',
             'smartphone',
-            'smartwhatch',
+            'smartwatch',
             'console',
-            'tv',
             'keyboard',
             'headset',
         ]
@@ -190,12 +191,16 @@ async function initDBTest() {
             const imageFileName = `${v4()}.${format}`
             //Formamos la ruta de la imagen
             const PRODUCTS_USER_FOLDER_PATH = path.join(
-                PRODUCTS_FOLDER_PATH, user_id.toString()
+                PRODUCTS_FOLDER_PATH,
+                user_id.toString()
             )
             //Creamos la ruta de la imagen
             await fs.mkdir(PRODUCTS_USER_FOLDER_PATH, { recursive: true })
             //Copiamos la imagen y la renombramos con imageFileName en la ruta PRODUCTS_USER_FOLDER_PATH
-            await fs.copyFile(file, path.join(PRODUCTS_USER_FOLDER_PATH, imageFileName))
+            await fs.copyFile(
+                file,
+                path.join(PRODUCTS_USER_FOLDER_PATH, imageFileName)
+            )
 
             await connection.query(
                 `INSERT INTO products (name, category, location, price, image, caption, user_id) VALUES(?, ?, ?, ?, ?, ?, ?)`,
@@ -208,6 +213,14 @@ async function initDBTest() {
                     chance.sentence({ words: 10 }),
                     user_id,
                 ]
+            )
+            //actualizar el numero de productos de cada usuario
+            const products = await connection.query(
+                `SELECT COUNT(*) AS total FROM products WHERE status IS NULL AND user_id = ${user_id}`
+            )
+            console.log(products[0][0].total)
+            await connection.query(
+                `UPDATE users SET products = ${products[0][0].total} WHERE id = ${user_id}`
             )
         }
 

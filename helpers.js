@@ -83,6 +83,26 @@ async function validateLikes(payload) {
     Joi.assert(payload, schema)
 }
 
+async function createLikesFilter(data, query, conditions, queryStrings) {
+    const { product_id, user_id, lover_id } = data
+    if (product_id || user_id || lover_id) {
+        if (product_id) {
+            conditions.push(`product_id = '${product_id}'`)
+            queryStrings.push(`product_id=${product_id}`)
+        }
+        if (user_id) {
+            conditions.push(`user_id = '${user_id}'`)
+            queryStrings.push(`user_id=${user_id}`)
+        }
+        if (lover_id) {
+            conditions.push(`lover_id = '${lover_id}'`)
+            queryStrings.push(`lover_id=${lover_id}`)
+        }
+        query = `${query} AND ${conditions.join(' AND ')}`
+    }
+    return { query, conditions, queryStrings }
+}
+
 async function createProductFilter(data, query, conditions, queryStrings) {
     const {
         category,
@@ -277,6 +297,7 @@ module.exports = {
     validateUsers,
     validateProducts,
     validateLikes,
+    createLikesFilter,
     createProductFilter,
     pagination,
 }

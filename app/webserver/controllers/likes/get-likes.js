@@ -8,6 +8,7 @@ const {
     generateError,
     validateLikes,
     pagination,
+    createLikesFilter,
 } = require('../../../../helpers')
 
 const MAX_LIKES_PER_PAGE = 10
@@ -78,27 +79,24 @@ const getAllLikes = async (req, res, next) => {
 }
 
 /***************************************************************
- ****************************MY*********************************
- **************************************************************/
-
-/* const getLikesByMe = async (req, res, next) => {
-    const logUserId = req.claims.userId
-    const page = parseInt(req.query.page, 10) || 1 //Pagina recibida por querystring o por defecto 1
-    const offset = (page - 1) * MAX_LIKES_PER_PAGE //Registros que se saltaran
-    let connection = null
-} */
-
-/***************************************************************
  ***********************BY PRODUCT ID***************************
  **************************************************************/
 
 const getLikesByProductId = async (req, res, next) => {
+    let connection = null
+
+    //DATOS DE LA PETICION
     const product_id = req.params.product_id
+    req.claims = { ...req.query }
+    const data = { ...req.claims }
+
+    //PARA LA PAGINACION
     const page = parseInt(req.query.page, 10) || 1 //Pagina recibida por querystring o por defecto 1
     const offset = (page - 1) * MAX_LIKES_PER_PAGE //Registros que se saltaran
-    let connection = null
+
+    //VALIDACIONES
     try {
-        await validateLikes({ product_id, page })
+        await validateLikes({ ...data, product_id })
         console.log('Datos validos')
     } catch (error) {
         return res.status(400).send({
@@ -108,14 +106,43 @@ const getLikesByProductId = async (req, res, next) => {
     }
     try {
         connection = await getConnection()
+        let conditions = []
         let queryStrings = []
-        let [totalLikes] = await connection.query(
-            `SELECT COUNT(*) AS total FROM likes WHERE product_id = ${product_id}`
+        let query = `SELECT id, product_id, user_id, lover_id FROM likes WHERE product_id = ${product_id}`
+
+        //Meter en query, conditions y queryStrings los elementos del objeto que devuelve la funcion createLikesFilter
+        const result = await createLikesFilter(
+            data,
+            query,
+            conditions,
+            queryStrings
         )
-        totalLikes = totalLikes[0].total
+        query = result.query
+        conditions = result.conditions
+        queryStrings = result.queryStrings
+
+        let totalLikes = null
+        //Cojo el total de productos que hay en la base de datos
+        if (conditions.length > 0) {
+            [totalLikes] = await connection.query(
+                `SELECT COUNT(*) AS total FROM likes WHERE product_id = ${product_id} AND ${conditions.join(
+                    ' AND '
+                )}`
+            )
+            totalLikes = totalLikes[0].total
+        } else {
+            [totalLikes] = await connection.query(
+                `SELECT COUNT(*) AS total FROM likes WHERE product_id = ${product_id}`
+            )
+            totalLikes = totalLikes[0].total
+        }
+
+        //Cojo el total de paginas que hay en la base de datos
         const totalPages = Math.ceil(totalLikes / MAX_LIKES_PER_PAGE)
+
+        //Cojo todos los likes resultantes de la consulta
         const [likes] = await connection.query(
-            `SELECT id, product_id, user_id, lover_id FROM likes WHERE product_id = ${product_id} LIMIT ${MAX_LIKES_PER_PAGE} OFFSET ${offset}`
+            `${query} LIMIT ${MAX_LIKES_PER_PAGE} OFFSET ${offset}`
         )
 
         if (totalLikes === 0) {

@@ -12,7 +12,7 @@ async function getUser(req, res) {
     try {
         if (!userId)
             return res.status(401).send({
-                status: 'Anauthorized',
+                status: 'Unauthorized',
                 message: 'No tiene permisos para solicitar los datos',
             })
 
@@ -41,4 +41,33 @@ async function getUser(req, res) {
     }
 }
 
-module.exports = getUser
+const getOwnerUser = async (req, res, next) => {
+    let connection = null
+
+    //DATOS DE LA PETICION
+    const id = req.params.id
+
+    //OBTENER LOS ELEMENTOS DE LA BASE DE DATOS
+    try {
+        connection = await getConnection()
+        const [user] = await connection.query(
+            `SELECT id, name, score, status, avatar, bio, likes, loves, products, votes, created_at FROM users WHERE id = ${id}`
+        )
+
+        if (!user.length) {
+            throw (
+                (new Error(`Not found. El usuario con id ${id} no existe`), 404)
+            )
+        }
+
+        const ownerUser = user[0]
+
+        return res.status(200).send(ownerUser)
+    } catch (error) {
+        next(error)
+    } finally {
+        if (connection) connection.release()
+    }
+}
+
+module.exports = { getUser, getOwnerUser }

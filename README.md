@@ -134,7 +134,7 @@ Para publicar un producto debemos introducir por el body con el formato **form-d
 - **location**: "Coruña " (required).
 - **caption**: "Ordenador portatil MSI ".
 
-> **Categorías Válidas:** 'desktop', 'notebook' ,' tablet', 'smatphone', 'ebook', smartwhatch', 'console'' 'tv', 'camera', 'mouse', 'keyboard', 'headset', 'speaker', 'printer', 'scanner', 'charger',
+> **Categorías Válidas:** 'desktop', 'notebook' ,' tablet', 'smatphone', 'ebook', smartwatch', 'console'' 'tv', 'camera', 'mouse', 'keyboard', 'headset', 'speaker', 'printer', 'scanner', 'charger',
 
 > **Formatos válidos de imagen**: 'jpeg', 'png'.
 

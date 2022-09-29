@@ -211,7 +211,63 @@ const getProductBySuggestion = async (req, res, next) => {
  *************************BY SEARCH*****************************
  **************************************************************/
 
-const getProductBySearch = async (req, res, next) => {}
+const getProductBySearch = async (req, res, next) => {
+    let connection = null
+
+    //DATOS DE LA PETICION
+    const data = `$req.params.search`
+    console.log(data)
+    let search = null
+
+    //PARA LA PAGINACION
+    // const page = parseInt(req.query.page, 10) || 1 //Pagina recibida por querystring o por defecto 1
+    // const offset = (page - 1) * MAX_PRODUCTS_PER_PAGE //Registros que se saltaran
+
+    //VALIDACIONES
+    try {
+        if (data.includes('-')) {
+            search = data.replace('-', ' ')
+            await validateProducts({ search })
+            console.log('datos validados')
+        } else {
+            await validateProducts({ search: data })
+            console.log('datos validados')
+        }
+    } catch (error) {
+        res.status(400).send({
+            status: 'Bad Request',
+            message: error.details[0].message,
+        })
+    }
+
+    //OBTENER LOS ELEMENTOS DE LA BASE DE DATOS
+    try {
+        //Creamos la conexion a la base de datos
+        connection = await getConnection()
+
+        if (search) {
+            //Numero de productos y productos buscando por nombre y por categoria
+            const [nameTotalProducts] = await connection.query(
+                `SELECT COUNT(*) AS total FROM products WHERE status IS NULL AND name LIKE '%${search}%'`
+            )
+            const [nameProducts] = await connection.query(
+                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.name LIKE '%${search}%' ORDER BY p.created_at ASC`
+            )
+            const [categoryTotalProducts] = await connection.query(
+                `SELECT COUNT(*) AS total FROM products WHERE status IS NULL AND category LIKE '%${search}%'`
+            )
+            const [categoryProducts] = await connection.query(
+                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.category LIKE '%${search}%' ORDER BY p.created_at ASC`
+            )
+        }
+    } catch (error) {
+        next(error) //Si llega aqui el error se envia al Middleware de gestion de errores
+    } finally {
+        if (connection) {
+            connection.release() //Liberamos la conexion
+        }
+    }
+}
 
 /***************************************************************
  ***************************BY ID*******************************
@@ -316,7 +372,7 @@ const getProductById = async (req, res, next) => {
             const totalProducts = 1
             const totalPages = Math.ceil(totalProducts / MAX_PRODUCTS_PER_PAGE)
             const [product] = await connection.query(
-                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.id = '${data}' LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
+                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.id = '${data}' LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
             )
             if (product.length === 0) {
                 throw generateError(
@@ -524,7 +580,7 @@ const getProductByCategory = async (req, res, next) => {
         connection = await getConnection()
         let conditions = []
         let queryStrings = []
-        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.category LIKE '%${category}%' ORDER BY p.created_at ASC`
+        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.category LIKE '%${category}%'`
 
         //Meter en query, conditions y queryStrings los elementos del objeto que devuelve la funcion createProductFilter
         const result = await createProductFilter(
@@ -543,12 +599,12 @@ const getProductByCategory = async (req, res, next) => {
             [totalProducts] = await connection.query(
                 `SELECT COUNT(*) AS total FROM products p WHERE p.status IS NULL AND p.category LIKE '%${category}%' AND ${conditions.join(
                     ' AND '
-                )}`
+                )} ORDER BY p.created_at ASC`
             )
             totalProducts = totalProducts[0].total
         } else {
             [totalProducts] = await connection.query(
-                `SELECT COUNT(*) AS total FROM products p WHERE p.status IS NULL AND p.category LIKE '%${category}%'`
+                `SELECT COUNT(*) AS total FROM products p WHERE p.status IS NULL AND p.category LIKE '%${category}%' ORDER BY p.created_at ASC`
             )
             totalProducts = totalProducts[0].total
         }

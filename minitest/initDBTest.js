@@ -106,7 +106,7 @@ async function initDBTest() {
         console.log('Nuevas tablas creadas! 👌')
 
         //metemos datos de prueba
-        const FAKE_USERS = 3
+        const FAKE_USERS = 20
         const password = 'mypassword'
 
         for (let i = 0; i < FAKE_USERS; i++) {
@@ -160,6 +160,11 @@ async function initDBTest() {
             'Pontevedra',
             'Lugo',
             'Ourense',
+            'Salamanca',
+            'Madrid',
+            'Sevilla',
+            'Almeria',
+            'Barcelona'
         ]
         const prices = [100, 500, 900, 1300, 1700, 2100, 2500, 2900, 3400]
         const FAKE_PRODUCTS = 200

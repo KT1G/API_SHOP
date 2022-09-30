@@ -547,6 +547,43 @@ const getProductByRankingCategories = async (req, res, next) => {
         }
     }
 }
+/***************************************************************
+ ************************BY LOCATION****************************
+ **************************************************************/
+const getProductBylocation = async (req, res, next) => {
+    let connection = null
+
+    //BUSCAR TODAS LAS LOCALIDADES DISTINTAS QUE HAY EN LA BASE DE DATOS
+    try {
+        connection = await getConnection()
+        //lista de categorias ordenadas por numero de productos
+        const [locations] = await connection.query(
+            `SELECT DISTINCT location, COUNT(*) AS total FROM products WHERE status IS NULL GROUP BY location ORDER BY total DESC`
+        )
+        console.log(locations)
+        if (locations.length === 0) {
+            throw generateError(
+                `Not Found. No existen categorias con productos`,
+                404
+            )
+        }
+        return res.status(200).send(locations)
+        //Hacer un map de las categorias para obtener un objeto con el nombre de la categoria y el numero de productos que hay en ella
+    } catch (error) {
+        next(error)
+    } finally {
+        if (connection) {
+            connection.release() //Liberamos la conexion
+        }
+    }
+}
+
+
+
+
+
+
+
 
 /***************************************************************
  ************************BY CATEGORY****************************
@@ -871,4 +908,5 @@ module.exports = {
     getProductByCategory,
     getProductByUserId,
     getBoughtProduct,
+    getProductBylocation,
 }

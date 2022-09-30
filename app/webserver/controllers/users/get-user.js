@@ -32,6 +32,7 @@ async function getUser(req, res) {
             status: 'ok',
             data: row[0],
         }
+        
         res.status(200).send(data)
     } catch (e) {
         if (connection !== null) {

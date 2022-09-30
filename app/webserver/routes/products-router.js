@@ -19,6 +19,7 @@ const {
     getProductByUserId,
     getBoughtProduct,
     getProductByRankingCategories,
+    getProductBylocation,
 } = require('../controllers/products/get-products')
 const {
     deleteProductById,
@@ -65,6 +66,8 @@ router.get(
     '/products/filterBy/rankingCategories',
     getProductByRankingCategories
 )
+
+router.get('/products/filterBy/location', getProductBylocation)
 // ge t several products by category
 router.get('/products/filterBy/category/:category', getProductByCategory)
 // get several products by userId

@@ -228,18 +228,14 @@ async function pagination(
 ) {
     if (queryStrings.length > 0) {
         const prevPage =
-            page > 1
-                ? `${urlBase}?page=${page - 1}&${queryStrings.join('&')}`
-                : null
-        const currentPage = `${urlBase}?page=${page}&${queryStrings.join('&')}`
+            page > 1 ? `?page=${page - 1}&${queryStrings.join('&')}` : null
+        const currentPage = `?page=${page}&${queryStrings.join('&')}`
         const nextPage =
             page < totalPages
-                ? `${urlBase}?page=${page + 1}&${queryStrings.join('&')}`
+                ? `?page=${page + 1}&${queryStrings.join('&')}`
                 : null
-        const firstPage = `${urlBase}?page=1&${queryStrings.join('&')}`
-        const lastPage = `${urlBase}?page=${totalPages}&${queryStrings.join(
-            '&'
-        )}`
+        const firstPage = `?page=1&${queryStrings.join('&')}`
+        const lastPage = `?page=${totalPages}&${queryStrings.join('&')}`
         const pageView = `Pagina: ${page} de ${totalPages}`
         const productsView = `Productos: ${offset + 1} al ${
             offset + object.length
@@ -261,12 +257,11 @@ async function pagination(
         //Si todo va bien. Devolvemos los productos y la info de la paginación
         return result
     } else {
-        const prevPage = page > 1 ? `${urlBase}?page=${page - 1}` : null
-        const currentPage = `${urlBase}?page=${page}`
-        const nextPage =
-            page < totalPages ? `${urlBase}?page=${page + 1}` : null
-        const firstPage = `${urlBase}?page=1`
-        const lastPage = `${urlBase}?page=${totalPages}`
+        const prevPage = page > 1 ? `?page=${page - 1}` : null
+        const currentPage = `?page=${page}`
+        const nextPage = page < totalPages ? `?page=${page + 1}` : null
+        const firstPage = `?page=1`
+        const lastPage = `?page=${totalPages}`
         const pageView = `Pagina: ${page} de ${totalPages}`
         const productsView = `Productos: ${offset + 1} al ${
             offset + object.length

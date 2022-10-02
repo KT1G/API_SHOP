@@ -150,6 +150,7 @@ async function initDBTest() {
             'console',
             'keyboard',
             'headset',
+            'tv',
         ]
 
         const locations = [
@@ -164,7 +165,7 @@ async function initDBTest() {
             'Madrid',
             'Sevilla',
             'Almeria',
-            'Barcelona'
+            'Barcelona',
         ]
         const prices = [100, 500, 900, 1300, 1700, 2100, 2500, 2900, 3400]
         const FAKE_PRODUCTS = 200
@@ -223,7 +224,6 @@ async function initDBTest() {
             const products = await connection.query(
                 `SELECT COUNT(*) AS total FROM products WHERE status IS NULL AND user_id = ${user_id}`
             )
-            console.log(products[0][0].total)
             await connection.query(
                 `UPDATE users SET products = ${products[0][0].total} WHERE id = ${user_id}`
             )

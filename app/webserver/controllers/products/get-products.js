@@ -21,6 +21,8 @@ const getAllProducts = async (req, res, next) => {
     let connection = null
 
     //DATOS DE LA PETICION
+    req.claims = { ...req.query }
+    const data = { ...req.claims }
 
     //PARA LA PAGINACION
     const page = parseInt(req.query.page, 10) || 1 //Pagina recibida por querystring o por defecto 1
@@ -28,7 +30,8 @@ const getAllProducts = async (req, res, next) => {
 
     //VALIDACIONES
     try {
-        await validateProducts({ page })
+        await validateProducts({ ...data })
+        console.log('Datos validados')
     } catch (error) {
         return res.status(400).send({
             status: 'Bad Request',
@@ -40,20 +43,45 @@ const getAllProducts = async (req, res, next) => {
     try {
         //Creamos la conexion a la base de datos
         connection = await getConnection()
+        let conditions = []
         let queryStrings = []
+        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL`
 
-        let [totalProducts] = await connection.query(
-            `SELECT COUNT(*) AS total FROM products WHERE status IS NULL`
+        //Meter en query, conditions y queryStrings los elementos del objeto que devuelve la funcion createProductFilter
+        const result = await createProductFilter(
+            data,
+            query,
+            queryStrings,
+            conditions
         )
-        totalProducts = totalProducts[0].total
-        console.log(totalProducts)
+        query = result.query
+        queryStrings = result.queryStrings
+        conditions = result.conditions
+
+        let totalProducts = null
+        //Cojo el total de productos que hay en la base de datos
+        if (conditions.length > 0) {
+            [totalProducts] = await connection.query(
+                `SELECT COUNT(*) AS total FROM products p WHERE p.status IS NULL AND ${conditions.join(
+                    ' AND '
+                )}`
+            )
+            totalProducts = totalProducts[0].total
+        } else {
+            [totalProducts] = await connection.query(
+                `SELECT COUNT(*) AS total FROM products p WHERE p.status IS NULL`
+            )
+            totalProducts = totalProducts[0].total
+        }
+
+        //Cojo el total de paginas que hay en la base de datos
         const totalPages = Math.ceil(totalProducts / MAX_PRODUCTS_PER_PAGE)
 
         //Cojo todos los products de la base de datos
         const [allProducts] = await connection.query(
-            `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL ORDER BY p.created_at ASC LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
+            `${query}  ORDER BY p.created_at ASC LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
         )
-
+        console.log(allProducts.length)
         //si no existe ningun product devuelve un error
         if (allProducts.length === 0) {
             throw generateError(`Not Found. No existen productos`, 404)
@@ -211,7 +239,7 @@ const getProductBySuggestion = async (req, res, next) => {
  *************************BY SEARCH*****************************
  **************************************************************/
 
-const getProductBySearch = async (req, res, next) => {
+/* const getProductBySearch = async (req, res, next) => {
     let connection = null
 
     //DATOS DE LA PETICION
@@ -267,7 +295,7 @@ const getProductBySearch = async (req, res, next) => {
             connection.release() //Liberamos la conexion
         }
     }
-}
+} */
 
 /***************************************************************
  ***************************BY ID*******************************
@@ -442,7 +470,7 @@ const getProductByName = async (req, res, next) => {
         connection = await getConnection()
         let conditions = []
         let queryStrings = []
-        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.name LIKE '%${name}%' ORDER BY p.created_at ASC`
+        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.name LIKE '%${name}%'`
 
         //Meter en query, conditions y queryStrings los elementos del objeto que devuelve la funcion createProductFilter
         const result = await createProductFilter(
@@ -476,7 +504,7 @@ const getProductByName = async (req, res, next) => {
 
         //Cojo todos los products resultantes de la consulta
         const [products] = await connection.query(
-            `${query} LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
+            `${query}  ORDER BY p.created_at ASC LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
         )
         console.log(products.length)
         //si no existen productos o la pagina devuelve un error
@@ -550,7 +578,7 @@ const getProductByRankingCategories = async (req, res, next) => {
 /***************************************************************
  ************************BY LOCATION****************************
  **************************************************************/
-const getProductBylocation = async (req, res, next) => {
+const getLocationAndTotal = async (req, res, next) => {
     let connection = null
 
     //BUSCAR TODAS LAS LOCALIDADES DISTINTAS QUE HAY EN LA BASE DE DATOS
@@ -578,13 +606,104 @@ const getProductBylocation = async (req, res, next) => {
     }
 }
 
+const getProductByLocation = async (req, res, next) => {
+    let connection = null
+    const { location } = req.params
+    req.claims = { ...req.query }
+    const data = req.claims
 
+    //PARA LA PAGINACION
+    const page = parseInt(req.query.page, 10) || 1 //Pagina recibida por querystring o por defecto 1
+    const offset = (page - 1) * MAX_PRODUCTS_PER_PAGE //Registros que se saltaran
 
+    //VALIDACIONES
+    try {
+        await validateProducts({ ...data, location })
+        console.log('datos validados')
+    } catch (error) {
+        return res.status(400).send({
+            status: 'bad request',
+            message: error.details[0].message,
+        })
+    }
 
+    //OBTENER LOS ELEMENTOS DE LA BASE DE DATOS
+    try {
+        connection = await getConnection()
+        let conditions = []
+        let queryStrings = []
+        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.location LIKE '%${location}%'`
 
+        //Meter en query, conditions y queryStrings los elementos del objeto que devuelve la funcion createProductFilter
+        const result = await createProductFilter(
+            data,
+            query,
+            queryStrings,
+            conditions
+        )
+        query = result.query
+        queryStrings = result.queryStrings
+        conditions = result.conditions
 
+        let totalProducts = null
+        //Cojo el total de productos que hay en la base de datos
+        if (conditions.length > 0) {
+            [totalProducts] = await connection.query(
+                `SELECT COUNT(*) AS total FROM products p WHERE p.status IS NULL AND p.location LIKE '%${location}%' AND ${conditions.join(
+                    ' AND '
+                )} ORDER BY p.created_at ASC`
+            )
+            totalProducts = totalProducts[0].total
+        } else {
+            [totalProducts] = await connection.query(
+                `SELECT COUNT(*) AS total FROM products p WHERE p.status IS NULL AND p.location LIKE '%${location}%' ORDER BY p.created_at ASC`
+            )
+            totalProducts = totalProducts[0].total
+        }
 
+        //Cojo el total de paginas que hay en la base de datos
+        const totalPages = Math.ceil(totalProducts / MAX_PRODUCTS_PER_PAGE) //Redondeo para arriba
 
+        //Cojo todos los products resultantes de la consulta
+        const [products] = await connection.query(
+            `${query} LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
+        )
+        console.log(products.length)
+        //si no existen productos o la pagina devuelve un error
+        if (products.length === 0) {
+            throw generateError(
+                `Not Found. No existen o se borraron los productos con ese filtro`,
+                404
+            )
+        } else if (page > totalPages) {
+            throw generateError(
+                `Not Found. No exite la pagina ${page}, van del 1 al ${totalPages}`,
+                404
+            )
+        } else {
+            const urlBase = `http://${req.headers.host}/api/products/filterBy/location/${location}`
+            return res
+                .status(200)
+                .send(
+                    await pagination(
+                        urlBase,
+                        page,
+                        totalPages,
+                        totalProducts,
+                        offset,
+                        products,
+                        queryStrings
+                    )
+                )
+        }
+    } catch (error) {
+        next(error) //Si llega aqui el error se envia al Middleware de gestion de errores
+    } finally {
+        if (connection) {
+            connection.release() //Liberamos la conexion
+        }
+    }
+}
 /***************************************************************
  ************************BY CATEGORY****************************
  **************************************************************/
@@ -901,12 +1020,12 @@ const getBoughtProduct = async (req, res, next) => {
 module.exports = {
     getAllProducts,
     getProductBySuggestion,
-    getProductBySearch,
     getProductById,
     getProductByName,
-    getProductByRankingCategories,
     getProductByCategory,
+    getProductByLocation,
+    getProductByRankingCategories,
     getProductByUserId,
     getBoughtProduct,
-    getProductBylocation,
+    getLocationAndTotal,
 }

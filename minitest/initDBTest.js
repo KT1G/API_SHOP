@@ -150,6 +150,7 @@ async function initDBTest() {
             'console',
             'keyboard',
             'headset',
+            'tv',
         ]
 
         const locations = [
@@ -164,7 +165,7 @@ async function initDBTest() {
             'Madrid',
             'Sevilla',
             'Almeria',
-            'Barcelona'
+            'Barcelona',
         ]
         const prices = [100, 500, 900, 1300, 1700, 2100, 2500, 2900, 3400]
         const FAKE_PRODUCTS = 200

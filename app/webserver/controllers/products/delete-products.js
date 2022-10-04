@@ -178,9 +178,10 @@ const deleteProductById = async (req, res, next) => {
                     })
                 })
 
-                res.status(200).send(
-                    'Productos e imágenes borrados, loves y likes actualizados'
-                )
+                res.status(200).send({
+                    status: 'deleted',
+                    message: `Productos e imágenes borrados, loves y likes actualizados`,
+                })
             }
         } else {
             //Comprobamos que exista el producto
@@ -272,9 +273,10 @@ const deleteProductById = async (req, res, next) => {
                 })
             }
             //Si todo fue bien
-            res.status(200).send(
-                'Producto e imagen borrados, loves y likes actualizados'
-            )
+            res.status(200).send({
+                status: 'deleted',
+                message: `Producto e imágene borrados, loves y likes actualizados`,
+            })
         }
     } catch (error) {
         next(error) //Si llega aqui el error se envia al Middleware de gestion de errores

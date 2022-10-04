@@ -156,7 +156,7 @@ async function putScoreUsers(req, res) {
         const [totalValoration] = await connection.query(
             `SELECT COUNT(valoration) AS total FROM products WHERE status='bought' AND user_id = ${userId}`
         )
-        //Actualizar el total de vote que tiene el usuario
+        //Actualizar el total de votes que tiene el usuario
         await connection.query(
             `UPDATE users SET votes = ${totalValoration[0].total} WHERE id = ${userId}`
         )

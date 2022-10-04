@@ -18,7 +18,7 @@ async function getUser(req, res) {
 
         connection = await getConnection()
         const [row] = await connection.query(
-            `SELECT id, email, created_at FROM users WHERE id = ${userId} `
+            `SELECT id, name, score, status, avatar, bio, likes, loves, products, votes, created_at FROM users WHERE id = ${userId} `
         )
 
         if (!row) {

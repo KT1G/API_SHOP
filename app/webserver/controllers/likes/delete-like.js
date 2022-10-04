@@ -82,7 +82,10 @@ const deleteLikeById = async (req, res, next) => {
         }
 
         //Si todo va bien
-        res.status(200).send('Like borrado y restado')
+        res.status(200).send({
+            status: 'Deleted',
+            message: `Like borrado y restado`,
+        })
     } catch (error) {
         next(error)
     } finally {
@@ -169,7 +172,10 @@ const deleteLikeByProductId = async (req, res, next) => {
             )
         }
         //Si todo va bien
-        res.status(200).send('Like borrado y restado')
+        res.status(200).send({
+            status: 'Deleted',
+            message: `Like borrado y restado`,
+        })
     } catch (error) {
         next(error)
     } finally {

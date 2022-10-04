@@ -3,7 +3,7 @@
 const express = require('express')
 const multer = require('multer')
 
-const checkAccountSession = require('../controllers/account/check-account.sesssion')
+const checkAccountSession = require('../controllers/account/check-account.session')
 const putScoreUsers = require('../controllers/users/score-user-controller')
 const { getUser, getOwnerUser } = require('../controllers/users/get-user')
 const {

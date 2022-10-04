@@ -2,7 +2,7 @@
 
 const express = require('express')
 
-const checkAccountSession = require('../controllers/account/check-account.sesssion')
+const checkAccountSession = require('../controllers/account/check-account.session')
 const likeProduct = require('../controllers/likes/add-new-like')
 const {getAllLikes, getLikesByProductId, getLikesByUserId, getLikesByLoverId} = require('../controllers/likes/get-likes')
 const {deleteLikeById, deleteLikeByProductId} = require('../controllers/likes/delete-like')

@@ -342,9 +342,7 @@ const getProductById = async (req, res, next) => {
     try {
         connection = await getConnection()
         //Coger el id mas grande de la base de datos
-        const [maxId] = await connection.query(
-            `SELECT MAX(id) AS maxId FROM products`
-        )
+        
         let queryStrings = []
 
         if (dataArray) {
@@ -366,7 +364,7 @@ const getProductById = async (req, res, next) => {
             if (notExist.length > 0) {
                 notExist = notExist.join(', ')
                 throw generateError(
-                    `Not Found. No existe, se borró o se compró el/los producto/s con id: ${notExist}; debe estar entre 1 y ${maxId[0].maxId}`,
+                    ` No existe el producto o ya ha sido comprado`,
                     404
                 )
             } else if (page > totalPages) {
@@ -404,7 +402,7 @@ const getProductById = async (req, res, next) => {
             )
             if (product.length === 0) {
                 throw generateError(
-                    `Not Found. No existe, se borró o se compró el producto con id: ${data}, debe estar entre 1 y ${maxId[0].maxId}`,
+                    ` No existe el producto o ya ha sido comprado`,
                     404
                 )
             } else if (page > totalPages) {

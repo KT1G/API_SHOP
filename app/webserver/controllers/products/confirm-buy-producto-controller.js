@@ -58,6 +58,7 @@ async function postConfirmBuyProduct(req, res) {
         ...req.body,
     }
 
+
     const authorization = req.query.email
 
     if (!authorization) {
@@ -130,9 +131,10 @@ async function postConfirmBuyProduct(req, res) {
     // validamos que el producto este disponible para comprar
 
     const now = new Date()
-    const deliveryTime = new Date(data.deliveryTime)
+    
+    const deliveryTime = new Date(data.deliveryTime) 
     console.log('now', now)
-    console.log('data.deliveryTime', deliveryTime)
+    console.log('deliveryTime', deliveryTime)
 
     if (now.getTime() > deliveryTime.getTime()) {
         return res.status(400).send({
@@ -142,12 +144,14 @@ async function postConfirmBuyProduct(req, res) {
         })
     }
 
+    const dateToSql = deliveryTime.toISOString().slice(0, 19).replace('T', ' ')
+
     const booking = {
         product_id: data.idProduct,
         created_at: now,
 
         delivery_address: data.deliveryAddress,
-        delivery_time: data.deliveryTime,
+        delivery_time: dateToSql
     }
 
     // Validamos que el producto no tenga una reserva, insertamos la reserva en la DDBB y cambiamos el status del producto a "bought" e insertamos el correo de la persona que ha comprado el producto.
@@ -183,7 +187,7 @@ async function postConfirmBuyProduct(req, res) {
         res.status(200).send({
             status: 'success',
             message:
-                'La venta se ha realizado correctamente, el comprador podra valorar al vendedor despues de la entrega del producto,',
+                'La venta se ha realizado correctamente, el vendedor recibirá un correo con la información de la entrega',
         })
 
         const dataEmail = {

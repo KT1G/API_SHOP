@@ -3,7 +3,7 @@
 const express = require('express')
 const multer = require('multer') // para subir archivos
 
-const checkAccountSession = require('../controllers/account/check-account.sesssion')
+const checkAccountSession = require('../controllers/account/check-account.session')
 const addNewProduct = require('../controllers/products/add-new-product-controller')
 const buyProduct = require('../controllers/products/buy-product-controller')
 

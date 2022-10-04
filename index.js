@@ -9,7 +9,12 @@ const { connect } = require('./app/db/db')
 const { listen } = require('./app/webserver/index')
 
 //const initDB = require('./app/db/initDB')
-const initDBTest = require('./minitest/initDBTest')
+//const initDBTest = require('./minitest/initDBTest')
+
+
+
+
+
 
 const port = process.env.PORT
 
@@ -26,7 +31,7 @@ async function initApp() {
     try {
         await connect()
         //await initDB()
-        await initDBTest()
+        //await initDBTest()
         await listen(port)
 
         console.log(`webserver listening at port ${port}`)

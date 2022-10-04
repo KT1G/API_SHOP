@@ -26,7 +26,7 @@ async function sendEmail({ emailFrom, emailTo, product, idProduct, token }) {
         html: `<h2>El usuario solicita la compra del siguiente producto</h2>
                 <p> ${JSON.stringify(product)} </p>
                 <h3>Acceda al siguiente enlace para aceptar la compra</h3>
-                <p> http://localhost:9000/api/products/${idProduct}/confirm?email=${token} </p>`,
+                <p> http://localhost:3000/products/${idProduct}/confirm?email=${token} </p>`,
     }
     mg.messages().send(data, (error, body) => {
         if (error) {
@@ -117,7 +117,7 @@ async function buyProduct(req, res) {
 
         res.status(200).send({
             status: 'success',
-            message: `La solicitud de compra ha sido enviada al vendedor ${userProduct.email} correctamente, ha espera de confirmación de compra`,
+            message: `La solicitud de compra ha sido enviada correctamente `,
         })
     } catch (e) {
         res.status(500).send({

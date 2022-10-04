@@ -4,7 +4,7 @@ const express = require('express')
 
 const createAccount = require('../controllers/account/create-account')
 const validateAccount = require('../controllers/account/validate-acount')
-const checkAccountSession = require('../controllers/account/check-account.sesssion')
+const checkAccountSession = require('../controllers/account/check-account.session')
 const {deleteMyAccount, deleteAccountById, deleteAllAccountsByAdmin
 } = require('../controllers/account/delete-accounts')
 

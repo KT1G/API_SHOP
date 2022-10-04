@@ -120,7 +120,7 @@ async function putScoreUsers(req, res) {
         const date = new Date(booking.delivery_time)
         console.log(now)
         console.log(date)
-        if (now.getTime() < date.getTime()) {
+        if (now.getTime() < date.getTime() ) {
             return res.status(403).send({
                 status: 'forbidden',
                 message:
@@ -154,11 +154,11 @@ async function putScoreUsers(req, res) {
 
         //Recuperar el total de valoration que tienen los productos del usuario
         const [totalValoration] = await connection.query(
-            `SELECT COUNT(valoration) AS total FROM products WHERE status='bought' user_id = ${userId}`
+            `SELECT COUNT(valoration) AS total FROM products WHERE status='bought' AND user_id = ${userId}`
         )
         //Actualizar el total de vote que tiene el usuario
         await connection.query(
-            `UPDATE users SET vote = ${totalValoration[0].total} WHERE id = ${userId}`
+            `UPDATE users SET votes = ${totalValoration[0].total} WHERE id = ${userId}`
         )
 
         // devolvemos la media de puntuaciones que tiene el usuario

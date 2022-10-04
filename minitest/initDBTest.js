@@ -190,7 +190,7 @@ async function initDBTest() {
             }
 
             //metemos el logo de la marca en la imagen
-            const file = `./logo/logo.png`
+            const file = `./img/logo.png`
             //Conseguimos el formato de la imagen
             const format = file.split('.').pop()
             //Creamos un nombre aleatorio para la imagen

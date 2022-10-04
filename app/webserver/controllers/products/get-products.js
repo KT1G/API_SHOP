@@ -79,7 +79,7 @@ const getAllProducts = async (req, res, next) => {
 
         //Cojo todos los products de la base de datos
         const [allProducts] = await connection.query(
-            `${query}  ORDER BY p.created_at ASC LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
+            `${query}  ORDER BY p.created_at DESC LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
         )
         console.log(allProducts.length)
         //si no existe ningun product devuelve un error
@@ -159,13 +159,13 @@ const getProductBySuggestion = async (req, res, next) => {
                 `SELECT COUNT(*) AS total FROM products WHERE status IS NULL AND name LIKE '%${search}%'`
             )
             const [nameProducts] = await connection.query(
-                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.name LIKE '%${search}%' ORDER BY p.created_at ASC`
+                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.name LIKE '%${search}%' ORDER BY p.created_at DESC`
             )
             const [categoryTotalProducts] = await connection.query(
                 `SELECT COUNT(*) AS total FROM products WHERE status IS NULL AND category LIKE '%${search}%'`
             )
             const [categoryProducts] = await connection.query(
-                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.category LIKE '%${search}%' ORDER BY p.created_at ASC`
+                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.category LIKE '%${search}%' ORDER BY p.created_at DESC`
             )
 
             if (
@@ -195,13 +195,13 @@ const getProductBySuggestion = async (req, res, next) => {
                 `SELECT COUNT(*) AS total FROM products WHERE status IS NULL AND name LIKE '%${data}%'`
             )
             const [nameProducts] = await connection.query(
-                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.name LIKE '%${data}%' ORDER BY p.created_at ASC`
+                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.name LIKE '%${data}%' ORDER BY p.created_at DESC`
             )
             const [categoryTotalProducts] = await connection.query(
                 `SELECT COUNT(*) AS total FROM products WHERE status IS NULL AND category LIKE '%${data}%'`
             )
             const [categoryProducts] = await connection.query(
-                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.category LIKE '%${data}%' ORDER BY p.created_at ASC`
+                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.category LIKE '%${data}%' ORDER BY p.created_at DESC`
             )
 
             if (
@@ -279,13 +279,13 @@ const getProductBySuggestion = async (req, res, next) => {
                 `SELECT COUNT(*) AS total FROM products WHERE status IS NULL AND name LIKE '%${search}%'`
             )
             const [nameProducts] = await connection.query(
-                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.name LIKE '%${search}%' ORDER BY p.created_at ASC`
+                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.name LIKE '%${search}%' ORDER BY p.created_at DESC`
             )
             const [categoryTotalProducts] = await connection.query(
                 `SELECT COUNT(*) AS total FROM products WHERE status IS NULL AND category LIKE '%${search}%'`
             )
             const [categoryProducts] = await connection.query(
-                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.category LIKE '%${search}%' ORDER BY p.created_at ASC`
+                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.category LIKE '%${search}%' ORDER BY p.created_at DESC`
             )
         }
     } catch (error) {
@@ -502,7 +502,7 @@ const getProductByName = async (req, res, next) => {
 
         //Cojo todos los products resultantes de la consulta
         const [products] = await connection.query(
-            `${query}  ORDER BY p.created_at ASC LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
+            `${query}  ORDER BY p.created_at DESC LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
         )
         console.log(products.length)
         //si no existen productos o la pagina devuelve un error
@@ -649,12 +649,12 @@ const getProductByLocation = async (req, res, next) => {
             [totalProducts] = await connection.query(
                 `SELECT COUNT(*) AS total FROM products p WHERE p.status IS NULL AND p.location LIKE '%${location}%' AND ${conditions.join(
                     ' AND '
-                )} ORDER BY p.created_at ASC`
+                )} ORDER BY p.created_at DESC`
             )
             totalProducts = totalProducts[0].total
         } else {
             [totalProducts] = await connection.query(
-                `SELECT COUNT(*) AS total FROM products p WHERE p.status IS NULL AND p.location LIKE '%${location}%' ORDER BY p.created_at ASC`
+                `SELECT COUNT(*) AS total FROM products p WHERE p.status IS NULL AND p.location LIKE '%${location}%' ORDER BY p.created_at DESC`
             )
             totalProducts = totalProducts[0].total
         }
@@ -753,12 +753,12 @@ const getProductByCategory = async (req, res, next) => {
             [totalProducts] = await connection.query(
                 `SELECT COUNT(*) AS total FROM products p WHERE p.status IS NULL AND p.category LIKE '%${category}%' AND ${conditions.join(
                     ' AND '
-                )} ORDER BY p.created_at ASC`
+                )} ORDER BY p.created_at DESC`
             )
             totalProducts = totalProducts[0].total
         } else {
             [totalProducts] = await connection.query(
-                `SELECT COUNT(*) AS total FROM products p WHERE p.status IS NULL AND p.category LIKE '%${category}%' ORDER BY p.created_at ASC`
+                `SELECT COUNT(*) AS total FROM products p WHERE p.status IS NULL AND p.category LIKE '%${category}%' ORDER BY p.created_at DESC`
             )
             totalProducts = totalProducts[0].total
         }

@@ -51,7 +51,7 @@ async function validateProducts(payload) {
             .pattern(/^[a-zA-Z\u00C0-\u017F]+$/),
         user_id: Joi.number().integer().positive().min(1),
         price: Joi.number().positive().min(0).max(3500),
-        minPrice: Joi.number().integer().positive().min(0),
+        minPrice: Joi.number().integer().positive().min(1),
         maxPrice: Joi.number().integer().positive().max(3500),
         likes: Joi.number().integer().positive().min(0),
         minLikes: Joi.number().integer().positive().min(0),
@@ -236,7 +236,7 @@ async function pagination(
                 : null
         const firstPage = `?page=1&${queryStrings.join('&')}`
         const lastPage = `?page=${totalPages}&${queryStrings.join('&')}`
-        const pageView = `Pagina: ${page} de ${totalPages}`
+        const pageView = `Página: ${page} de ${totalPages}`
         const productsView = `Productos: ${offset + 1} al ${
             offset + object.length
         }, de ${totalObject}`

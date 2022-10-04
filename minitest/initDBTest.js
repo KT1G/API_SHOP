@@ -9,12 +9,12 @@ const fs = require('fs/promises')
 const path = require('path')
 
 const PROJECT_MAIN_FOLDER_PATH = process.cwd()
-const PUBLIC_FOLDER_PATH = path.join(PROJECT_MAIN_FOLDER_PATH, 'public')
-const PRODUCTS_FOLDER_PATH = path.join(
-    PUBLIC_FOLDER_PATH,
-    'uploads',
-    'products'
+const PUBLIC_FOLDER_PATH = path.join(
+    PROJECT_MAIN_FOLDER_PATH,
+    'public',
+    'uploads'
 )
+const PRODUCTS_FOLDER_PATH = path.join(PUBLIC_FOLDER_PATH, 'products')
 
 async function initDBTest() {
     let connection = null

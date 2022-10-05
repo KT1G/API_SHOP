@@ -187,7 +187,7 @@ async function postConfirmBuyProduct(req, res) {
         res.status(200).send({
             status: 'success',
             message:
-                'La venta se ha realizado correctamente, el vendedor recibirá un correo con la información de la entrega',
+                'La venta se ha realizado correctamente',
         })
 
         const dataEmail = {

@@ -9,22 +9,15 @@ const Joi = require('joi')
 
 const IMG_VALID_FORMATS = ['jpeg', 'png']
 const CATEGORY_VALID = [
-    'desktop',
-    'notebook',
-    'tablet',
-    'smartphone',
-    'ebook',
-    'smartwatch',
-    'console',
-    'tv',
-    'camera',
-    'mouse',
-    'keyboard',
-    'headset',
-    'speaker',
-    'printer',
-    'scanner',
-    'charger',
+    'Desktop',
+    'Notebook',
+    'Tablet',
+    'Smartphone',
+    'Smartwatch',
+    'Console',
+    'Keyboard',
+    'Headset',
+    'Tv',
 ]
 
 const MAX_IMAGE_WIDTH = 600
@@ -65,6 +58,7 @@ async function addNewProduct(req, res, next) {
 
     const userId = req.claims.userId
     const file = req.file
+  
 
     console.log(file)
 
@@ -75,20 +69,21 @@ async function addNewProduct(req, res, next) {
         location: req.body.location,
         caption: req.body.caption,
     }
+    console.log(dataProduct)
 
     try {
         await validateProduct(dataProduct)
     } catch (e) {
         return res.status(400).send({
             status: 'Bad request',
-            message: `Los datos introducidos no son correctos o faltan campos por rellenar. Acuerdese de que la categoria debe ser ${CATEGORY_VALID}`,
+            message: `Este producto no es valido`,
         })
     }
     // Comprobamos que se haya enviado una imagen del producto
     if (!file || !file.buffer) {
         return res.status(400).send({
             status: 'Bad request',
-            message: 'debes introducir una imagen del producto',
+            message: 'Debes introducir una imagen del producto',
         })
     }
 
@@ -170,7 +165,6 @@ async function addNewProduct(req, res, next) {
         )
         console.log(row[0].lastIid)
 
-        const idNewProduct = row[0].lastIid
 
         //Recuperar el total de productos que tiene el usuario
         const [totalProducts] = await connection.query(
@@ -189,7 +183,7 @@ async function addNewProduct(req, res, next) {
 
         return res.status(201).send({
             status: 'Created',
-            message: `El producto con la id ${idNewProduct} ha sido añadido con exito`,
+            message: `El producto ha sido añadido con exito !`,
         })
     } catch (e) {
         if (connection !== null) {

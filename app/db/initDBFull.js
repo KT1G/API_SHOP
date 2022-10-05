@@ -1,6 +1,7 @@
 'use strict'
+require('dotenv').config()
 
-const { getConnection } = require('../app/db/db')
+const { getConnection, connect } = require('./db')
 const Chance = require('chance')
 const chance = new Chance()
 const v4 = require('uuid').v4
@@ -20,6 +21,7 @@ async function initDBTest() {
     let connection = null
 
     try {
+        await connect()
         connection = await getConnection()
 
         console.log('Borrando el directorio de fotos 🖼️')
@@ -125,32 +127,32 @@ async function initDBTest() {
         }
 
         const names = [
-            'hp',
-            'sony',
-            'acer',
-            'toshiba',
-            'samsung',
-            'apple',
-            'lenovo',
-            'asus',
-            'msi',
-            'dell',
-            'siemens',
-            'lg',
-            'philips',
-            'asus',
+            'Hp',
+            'Sony',
+            'Acer',
+            'Toshiba',
+            'Samsung',
+            'Apple',
+            'Lenovo',
+            'Asus',
+            'Msi',
+            'Dell',
+            'Siemens',
+            'Lg',
+            'Philips',
+            'Asus',
         ]
 
         const categories = [
-            'desktop',
-            'notebook',
-            'tablet',
-            'smartphone',
-            'smartwatch',
-            'console',
-            'keyboard',
-            'headset',
-            'tv',
+            'Desktop',
+            'Notebook',
+            'Tablet',
+            'Smartphone',
+            'Smartwatch',
+            'Console',
+            'Keyboard',
+            'Headset',
+            'Tv',
         ]
 
         const locations = [
@@ -238,8 +240,11 @@ async function initDBTest() {
     } finally {
         if (connection) {
             connection.release()
+            process.exit()
         }
     }
 }
+initDBTest()
+
 
 module.exports = initDBTest

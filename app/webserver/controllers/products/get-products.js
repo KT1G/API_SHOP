@@ -45,7 +45,7 @@ const getAllProducts = async (req, res, next) => {
         connection = await getConnection()
         let conditions = []
         let queryStrings = []
-        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL`
+        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption,p.status, p.likes, p.user_id, u.name AS user_name,  u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL`
 
         //Meter en query, conditions y queryStrings los elementos del objeto que devuelve la funcion createProductFilter
         const result = await createProductFilter(
@@ -84,7 +84,7 @@ const getAllProducts = async (req, res, next) => {
         console.log(allProducts.length)
         //si no existe ningun product devuelve un error
         if (allProducts.length === 0) {
-            throw generateError(`Not Found. No existen productos`, 404)
+            throw generateError(`No existen productos`, 404)
         } else if (page > totalPages) {
             throw generateError(
                 `Not Found. No existe la pagina ${page}, Van del 1 al ${totalPages}`,
@@ -159,13 +159,13 @@ const getProductBySuggestion = async (req, res, next) => {
                 `SELECT COUNT(*) AS total FROM products WHERE status IS NULL AND name LIKE '%${search}%'`
             )
             const [nameProducts] = await connection.query(
-                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.name LIKE '%${search}%' ORDER BY p.created_at DESC`
+                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.status, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.name LIKE '%${search}%' ORDER BY p.created_at DESC`
             )
             const [categoryTotalProducts] = await connection.query(
                 `SELECT COUNT(*) AS total FROM products WHERE status IS NULL AND category LIKE '%${search}%'`
             )
             const [categoryProducts] = await connection.query(
-                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.category LIKE '%${search}%' ORDER BY p.created_at DESC`
+                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption,p.status. p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.category LIKE '%${search}%' ORDER BY p.created_at DESC`
             )
 
             if (
@@ -201,7 +201,7 @@ const getProductBySuggestion = async (req, res, next) => {
                 `SELECT COUNT(*) AS total FROM products WHERE status IS NULL AND category LIKE '%${data}%'`
             )
             const [categoryProducts] = await connection.query(
-                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.category LIKE '%${data}%' ORDER BY p.created_at DESC`
+                `SELECT p.id, p.category, p.name, p.status, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score, p.created_at FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND p.category LIKE '%${data}%' ORDER BY p.created_at DESC`
             )
 
             if (
@@ -342,7 +342,7 @@ const getProductById = async (req, res, next) => {
     try {
         connection = await getConnection()
         //Coger el id mas grande de la base de datos
-        
+
         let queryStrings = []
 
         if (dataArray) {
@@ -353,7 +353,7 @@ const getProductById = async (req, res, next) => {
             await Promise.all(
                 dataArray.map(async (id) => {
                     const [product] = await connection.query(
-                        `SELECT id FROM products WHERE status IS NULL AND id = ${id}`
+                        `SELECT id FROM products WHERE  id = ${id}`
                     )
                     if (product.length === 0) {
                         notExist.push(id)
@@ -376,7 +376,7 @@ const getProductById = async (req, res, next) => {
                 const dataString = dataArray.join(', ')
                 //hacer la busqueda de los productos por id
                 const [products] = await connection.query(
-                    `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.id IN (${dataString}) LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
+                    `SELECT p.id, p.category, p.name, p.price, p.status ,p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE  p.id IN (${dataString}) LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
                 )
 
                 const urlBase = `http://${req.headers.host}/api/products/filterBy/id/${data}`
@@ -398,7 +398,7 @@ const getProductById = async (req, res, next) => {
             const totalProducts = 1
             const totalPages = Math.ceil(totalProducts / MAX_PRODUCTS_PER_PAGE)
             const [product] = await connection.query(
-                `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.id = '${data}' LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
+                `SELECT p.id, p.category, p.name, p.price,p.status, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.id = '${data}' LIMIT ${MAX_PRODUCTS_PER_PAGE} OFFSET ${offset}`
             )
             if (product.length === 0) {
                 throw generateError(
@@ -468,7 +468,7 @@ const getProductByName = async (req, res, next) => {
         connection = await getConnection()
         let conditions = []
         let queryStrings = []
-        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.name LIKE '%${name}%'`
+        let query = `SELECT p.id, p.category, p.status, p.name, p.price, p.location, p.image, p.caption, p.likes, p.user_id, u.name AS user_name, u.score AS user_score FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status IS NULL AND  p.name LIKE '%${name}%'`
 
         //Meter en query, conditions y queryStrings los elementos del objeto que devuelve la funcion createProductFilter
         const result = await createProductFilter(
@@ -507,10 +507,7 @@ const getProductByName = async (req, res, next) => {
         console.log(products.length)
         //si no existen productos o la pagina devuelve un error
         if (products.length === 0) {
-            throw generateError(
-                `Not Found. No existen o se borraron los productos con ese filtro`,
-                404
-            )
+            throw generateError(`No hay productos`, 404)
         } else if (page > totalPages) {
             throw generateError(
                 `Not Found. No exite la pagina ${page}, van del 1 al ${totalPages}`,
@@ -669,10 +666,7 @@ const getProductByLocation = async (req, res, next) => {
         console.log(products.length)
         //si no existen productos o la pagina devuelve un error
         if (products.length === 0) {
-            throw generateError(
-                `Not Found. No existen o se borraron los productos con ese filtro`,
-                404
-            )
+            throw generateError(`No hay productos`, 404)
         } else if (page > totalPages) {
             throw generateError(
                 `Not Found. No exite la pagina ${page}, van del 1 al ${totalPages}`,
@@ -773,10 +767,7 @@ const getProductByCategory = async (req, res, next) => {
         console.log(products.length)
         //si no existen productos o la pagina devuelve un error
         if (products.length === 0) {
-            throw generateError(
-                `Not Found. No existen o se borraron los productos con ese filtro`,
-                404
-            )
+            throw generateError(`No hay productos`, 404)
         } else if (page > totalPages) {
             throw generateError(
                 `Not Found. No exite la pagina ${page}, van del 1 al ${totalPages}`,
@@ -879,10 +870,7 @@ const getProductByUserId = async (req, res, next) => {
 
         //si no existe el product devuelve un error
         if (products.length === 0) {
-            throw generateError(
-                `Not Found. No existen o se borraron los producto con ese filtro`,
-                404
-            )
+            throw generateError(`Non hay productos`, 404)
         } else if (page > totalPages) {
             throw generateError(
                 `Not Found. No exite la pagina ${page}, van del 1 al ${totalPages}`,
@@ -944,7 +932,7 @@ const getBoughtProduct = async (req, res, next) => {
         connection = await getConnection()
         let conditions = []
         let queryStrings = []
-        let query = `SELECT p.id, p.category, p.name, p.price, p.location, p.likes, p.user_id, p.image, p.caption, u.name AS user_name, u.score AS user_score, p.valoration, p.buyer_id FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status = 'bought'`
+        let query = `SELECT p.id, p.category, p.status, p.name, p.price, p.location, p.likes, p.user_id, p.image, p.caption, u.name AS user_name, u.score AS user_score, p.valoration, p.buyer_id FROM products p LEFT JOIN users u ON p.user_id= u.id WHERE p.status = 'bought'`
 
         //Meter en query, conditions y queryStrings los elementos del objeto que devuelve la funcion createProductFilter
         const result = await createProductFilter(
@@ -981,10 +969,7 @@ const getBoughtProduct = async (req, res, next) => {
         )
         console.log(products.length)
         if (products.length === 0) {
-            throw generateError(
-                `Not Found. No existen o se borraron los producto con ese filtro`,
-                404
-            )
+            throw generateError(`No hay productos`, 404)
         } else if (page > totalPages) {
             throw generateError(
                 `Not Found. No exite la pagina ${page}, van del 1 al ${totalPages}`,

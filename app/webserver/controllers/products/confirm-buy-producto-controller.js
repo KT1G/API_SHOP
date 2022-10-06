@@ -31,11 +31,12 @@ async function sendEmail({
     const data = {
         from: emailFrom,
         to: emailTo,
-        subject: 'Solicitud de compra',
+        subject: 'Aceptación de compra',
         html: `<h2>El vendedor ha aceptado su solicitud de compra</h2>
                 <p>El producto con id ${productId} será entregado en ${deliveryAddress} a las ${deliveryTime}</p>
-                    <h3>Para valorar al vendedor acceda al siguiente enlace puede valorarlo cambiando el parametro "vote" con un numero entre 1-5</h3>
-                    <p>http://localhost:9000/api/users/score/${productId}?vote=5</p>`,
+                    <h3>Una vez que haya recivido su producto prodrá valorar al vendedor en el siguiente enlace o accediendo directamente desde superfil !  </h3>
+                    <p>Gracias por confiar en nosotros !</p>
+                    <a href="http://localhost:3000/users/score/${productId}"> ---> Click aquí para valorar al vendedor <--- </a>`,
     }
     mg.messages().send(data, (error, body) => {
         if (error) {

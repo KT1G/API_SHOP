@@ -23,10 +23,10 @@ async function sendEmail({ emailFrom, emailTo, product, idProduct, token }) {
         from: emailFrom,
         to: emailTo,
         subject: 'Solicitud de compra',
-        html: `<h2>El usuario solicita la compra del siguiente producto</h2>
+        html: `<h2>El usuario solicita la compra del siguiente producto.</h2>
                 <p> ${JSON.stringify(product)} </p>
-                <h3>Acceda al siguiente enlace para aceptar la compra</h3>
-                <p> http://localhost:3000/products/${idProduct}/confirm?email=${token} </p>`,
+                <h3>Acceda al siguiente enlace para indicar lugar y hora de entrega en caso de acceptar la solicitud de compra.</h3>
+                <a href=" http://localhost:3000/products/${idProduct}/confirm?email=${token}">---> Click aquí para aceptar la compra <---</a>`,
     }
     mg.messages().send(data, (error, body) => {
         if (error) {

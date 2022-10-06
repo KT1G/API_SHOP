@@ -66,7 +66,7 @@ async function putScoreUsers(req, res) {
             return res.status(403).send({
                 status: 'Forbidden',
                 message:
-                    'El producto no ha sido comprado, no puede puntuar al usuario',
+                    'El producto no ha sido comprado, aun no puedes valorar al usuario',
             })
         }
 
@@ -75,7 +75,7 @@ async function putScoreUsers(req, res) {
         if (product.user_id === userData.id) {
             return res.status(403).send({
                 status: 'Forbidden',
-                message: 'No puede puntuarse a si mismo',
+                message: 'No puedes puntuarte a ti mismo 😅',
             })
         }
 

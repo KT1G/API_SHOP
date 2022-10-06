@@ -41,10 +41,9 @@ const putUpdateUserInfo = async (req, res, next) => {
     try {
         connection = await getConnection()
 
-        const { name, bio, status } = payload //Recogemos en variables los datos que nos llegan
-        const query =
-            'UPDATE users SET name = ?, bio = ?, status = ? WHERE id = ?' //Query para actualizar el usuario
-        const values = [name, bio, status, logUserId] //Valores para la query
+        const { name, bio } = payload //Recogemos en variables los datos que nos llegan
+        const query = 'UPDATE users SET name = ?, bio = ? WHERE id = ?' //Query para actualizar el usuario
+        const values = [name, bio, logUserId] //Valores para la query
         const [result] = await connection.query(query, values)
 
         //Comprobar si se ha actualizado el usuario
@@ -54,7 +53,10 @@ const putUpdateUserInfo = async (req, res, next) => {
                 400
             )
         }
-        res.status(200).send(`Usuario con id: ${logUserId} actualizado`)
+        res.status(200).send({
+            status: 'Ok',
+            message: `Usuario actualizado`,
+        })
     } catch (error) {
         next(error)
     } finally {
@@ -118,7 +120,7 @@ const putUpdateUserStatus = async (req, res, next) => {
             )
         } else if (userStatus[0].status !== 'active') {
             throw generateError(
-                `Bad Request. El usuario con id: ${userId} no tiene status active`,
+                `Bad Request. El usuario con id: ${userId} no tiene status active`
             )
         } else if (admin[0].status !== 'admin') {
             throw generateError(
@@ -200,7 +202,10 @@ const putUpdateUserAvatar = async (req, res, next) => {
         await image.toFile(path.join(imageUploadPath, imageFileName))
 
         //Si todo fue bien
-        res.status(200).send(`Usuario con id: ${userId} actualizado`)
+        res.status(200).send({
+            status: 'Ok',
+            message: 'Avatar actualizado',
+        })
     } catch (error) {
         next(error)
     } finally {

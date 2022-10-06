@@ -28,9 +28,8 @@ async function sendEmail(userEmail, token) {
         from: 'BraianLuis@apishop.com',
         to: userEmail,
         subject: 'Bienvenido',
-        html: `<h2>copie el siguiente enlace en el postman para verificar o directamente en el navegador </h2>
-            <p>http://localhost:3000/accounts/confirm/${token}</p>
-             `,
+        html: `<h2>Accede al siguiente enlace para activar la cuenta </h2>
+        <a href="http://localhost:3000/accounts/confirm/${token}">---> Click aquí para activar la cuenta <---</a>`,
     }
     mg.messages().send(data, (error, body) => {
         if (error) {

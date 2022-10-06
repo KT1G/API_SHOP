@@ -108,7 +108,7 @@ async function initDBTest() {
         console.log('Nuevas tablas creadas! 👌')
 
         //metemos datos de prueba
-        const FAKE_USERS = 20
+        const FAKE_USERS = 3
         const password = 'mypassword'
 
         for (let i = 0; i < FAKE_USERS; i++) {

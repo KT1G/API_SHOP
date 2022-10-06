@@ -108,7 +108,7 @@ const getLikesByProductId = async (req, res, next) => {
         connection = await getConnection()
         let conditions = []
         let queryStrings = []
-        let query = `SELECT id, product_id, user_id, lover_id FROM likes WHERE product_id = ${product_id}`
+        let query = `SELECT p.id, p.image, p.price, p.name, p.category, p.location, p.caption FROM Likes l RIGHT JOIN products p ON l.product_id=p.id WHERE product_id = ${product_id}`
 
         //Meter en query, conditions y queryStrings los elementos del objeto que devuelve la funcion createLikesFilter
         const result = await createLikesFilter(
@@ -207,7 +207,7 @@ const getLikesByUserId = async (req, res, next) => {
         totalLikes = totalLikes[0].total
         const totalPages = Math.ceil(totalLikes / MAX_LIKES_PER_PAGE)
         const [likes] = await connection.query(
-            `SELECT id, product_id, user_id, lover_id FROM likes WHERE user_id = ${user_id} LIMIT ${MAX_LIKES_PER_PAGE} OFFSET ${offset}`
+            `SELECT p.id, p.image, p.price, p.name, p.category, p.location, p.caption FROM Likes l RIGHT JOIN products p ON l.product_id=p.id WHERE user_id = ${user_id} LIMIT ${MAX_LIKES_PER_PAGE} OFFSET ${offset}`
         )
 
         if (totalLikes === 0) {
@@ -273,7 +273,7 @@ const getLikesByLoverId = async (req, res, next) => {
 
         const totalPages = Math.ceil(totalLikes / MAX_LIKES_PER_PAGE)
         const [likes] = await connection.query(
-            `SELECT p.id, p.image, p.price, p.name, p.caption, p.user_id FROM Likes l RIGHT JOIN products p ON l.product_id=p.id WHERE lover_id = ${lover_id} LIMIT ${MAX_LIKES_PER_PAGE} OFFSET ${offset}`
+            `SELECT p.id, p.image, p.price, p.name, p.category, p.location, p.caption, p.user_id FROM Likes l RIGHT JOIN products p ON l.product_id=p.id WHERE lover_id = ${lover_id} LIMIT ${MAX_LIKES_PER_PAGE} OFFSET ${offset}`
         )
 
         if (totalLikes === 0) {

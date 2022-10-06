@@ -9,18 +9,19 @@ Los requisitos que se piden para la creación de la API se encuentran en el arch
 ------------
 1. Instalar los node_modules con el comando **"npm install"**.
 2. Crear el archivo ***.env*** y rellenar los datos basándonos en el archivo ***.env.example***. IMPORTANTE! Los datos de mailgun deben ser importados tal cual estan en el archivo ***.env.example***.
-3. En el archivo ***.index*** principal de la app en las lineas 29 y 30 se encuentran 2 funciones para la creación de la DDBB, para su uso debemos elegir cual vamos a usar y descomentarla antes de arrancar la aplicación. IMPORATANTE! Para evitar que la DDBB se sobrescriba con cada guardado es necesario comentar de nuevo la función.
-4. Iniciar la app con el comando **"npm run dev"**.
+3. Para iniciar la aplicacion previamente se debe ejecutar un script a elegir entre ***npm run dbFull*** o ***npm run dbEmpy*** y una vez finalizado el proceso ejecutaremos el scrip ***npm run dev*** que inicia el Servidor.
 
 #### Uso de las DDBB
 
 ------------
 
-- La función *"initDB"* crea la DDBB con las distintas tablas necesarias para su uso, esta función sería la que queda para cuando se lance a producción ya que  no introduce ningún dato en las tablas.
+- La función *"dbEmpy"* crea la DDBB con las distintas tablas necesarias para su uso, esta función sería la que queda para cuando se lance a producción ya que no introduce ningún dato en las tablas.
 
-- La función *"initDBTest"* crea la DDBB con las distintas tablas necesarias para su uso, así como una serie de usuarios y productos para que se puedan hacer búsquedas más complejas entre otras funciones. Para vuestra comodidad dejamos activos los siguientes emails que ya están registrados en mailgun.
+- La función *"dbFull"* crea la DDBB con las distintas tablas necesarias para su uso, así como una serie de usuarios y productos para que se puedan hacer búsquedas más complejas entre otras funciones. Para vuestra comodidad dejamos activos los siguientes emails que ya están registrados en mailgun.
 
 > "habfakebraian@yopmail.com" y "habfakeluis@yopmail.com" para probar los endpoints de creación y activación de los usuarios así como el resto de endpoints. y otros 3 "habfakeuser-example@yopmail.com" que ya están activados en la base de datos en los que se cargan los diferentes productos. IMPORTANTE! Sustituir la palabra example por un número entre 1-3.
+
+- Debido a las limitaciones que nos impone MailGun, solo podemos crear un total de 5 cuentas funcionales por lo que eso afecta a la riqueza de la aplicación en cuanto a interacción con otros usuarios ya que si introducimos mas usuarios no se podrian comprar y valorar sus productos por la incapacidad de que le lleguen emails.
 
 ### Uso de la API
 ------------

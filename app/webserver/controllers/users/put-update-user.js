@@ -204,7 +204,7 @@ const putUpdateUserAvatar = async (req, res, next) => {
     } catch (error) {
         next(error)
     } finally {
-        if (connection) {
+        if (connection !==  null) {
             connection.release()
         }
         res.end(0)

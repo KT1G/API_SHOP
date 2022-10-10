@@ -38,6 +38,7 @@ async function validateUsers(payload) {
     Joi.assert(payload, schema)
 }
 
+
 async function validateProducts(payload) {
     const schema = Joi.object({
         search: Joi.string().max(255),

@@ -1,9 +1,6 @@
 const { getConnection } = require('../../../db/db')
 
 async function getUser(req, res) {
-    /* 
-  
-   */
 
     const userId = req.claims.userId
 
@@ -39,6 +36,10 @@ async function getUser(req, res) {
             connection.release()
         }
         res.status(500).send(e.message)
+    } finally {
+        if (connection !== null) {
+            connection.release()
+        }
     }
 }
 
@@ -67,7 +68,7 @@ const getOwnerUser = async (req, res, next) => {
     } catch (error) {
         next(error)
     } finally {
-        if (connection) connection.release()
+        if (connection !== null) connection.release()
     }
 }
 

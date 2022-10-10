@@ -38,6 +38,7 @@ async function checkAccountSession(req, res, next) {
         }
 
         return next()
+        
     } catch (error) {
         next (error)
     }

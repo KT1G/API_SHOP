@@ -126,6 +126,7 @@ async function postConfirmBuyProduct(req, res) {
         console.error(e.message)
         return res.status(500).send()
     } finally {
+        if(connection !== null)
         connection.release()
     }
 

@@ -196,7 +196,7 @@ async function putScoreUsers(req, res) {
             status: 'Internal Server Error',
         })
     } finally {
-        if (connection) {
+        if (connection !== null) {
             connection.release()
         }
     }

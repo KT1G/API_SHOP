@@ -16,7 +16,7 @@ let pool = null;
 
 async function connect() {
     const options = {
-        connectionLimit: 10, // maximo 10 conexiones simultáneas (para el pool)
+        connectionLimit: 30, // maximo 10 conexiones simultáneas (para el pool)
         host: MYSQL_HOST,
         user: MYSQL_USER,
         password: MYSQL_PASSWORD,

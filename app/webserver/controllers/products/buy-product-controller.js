@@ -120,13 +120,14 @@ async function buyProduct(req, res) {
             message: `La solicitud de compra ha sido enviada correctamente `,
         })
     } catch (e) {
+         connection.release()
         res.status(500).send({
             status: 'error',
             message: 'Error en el servidor',
         })
-        if (connection !== null) {
-            connection.release()
-        }
+        
+    } finally {
+        if (connection !== null) connection.release()
     }
 }
 

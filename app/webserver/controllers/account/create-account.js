@@ -102,9 +102,7 @@ async function createAccount(req, res, next) {
         })
     } catch (e) {
         // en este catch nos aseguramos que no haya un usuario igual en la base de datos y liberamos la conexion por si no la liberamos en el try dado que hubo un error
-        if (connection !== null) {
-            connection.release()
-        }
+        connection.release()
         console.error(e.message)
 
         if (e.code === 'ER_DUP_ENTRY') {
@@ -115,6 +113,11 @@ async function createAccount(req, res, next) {
         }
 
         res.status(500).send()
+    }
+    finally{
+        if(connection !== null){
+            connection.release()
+        }
     }
 }
 

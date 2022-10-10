@@ -21,7 +21,7 @@ const CATEGORY_VALID = [
 ]
 
 const MAX_IMAGE_WIDTH = 600
-const MAX_LIMIT_POST = 10
+const MAX_LIMIT_POST = 1045
 
 const PROJECT_MAIN_FOLDER_PATH = process.cwd() // ruta de nuestro proyecto
 const IMG_FOLDER_PATH = path.join(
@@ -191,6 +191,10 @@ async function addNewProduct(req, res, next) {
         }
         console.log(e)
         return res.status(500).send(e.message)
+    }finally{
+        if (connection !== null) {
+            connection.release()
+        }
     }
 }
 

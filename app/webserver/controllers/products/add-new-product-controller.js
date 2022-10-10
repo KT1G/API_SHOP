@@ -21,7 +21,11 @@ const CATEGORY_VALID = [
 ]
 
 const MAX_IMAGE_WIDTH = 600
+<<<<<<< HEAD
 const MAX_LIMIT_POST = 1045
+=======
+//const MAX_LIMIT_POST = 10
+>>>>>>> c697408d4648534b21571017f757a55118ede89d
 
 const PROJECT_MAIN_FOLDER_PATH = process.cwd() // ruta de nuestro proyecto
 const IMG_FOLDER_PATH = path.join(
@@ -58,7 +62,6 @@ async function addNewProduct(req, res, next) {
 
     const userId = req.claims.userId
     const file = req.file
-  
 
     console.log(file)
 
@@ -121,13 +124,15 @@ async function addNewProduct(req, res, next) {
         if (!rows) {
             connection.release()
         }
-        const { publicaciones } = rows[0] || 0
+
+        //Si se quiere limitar el Nº de productos por usuario
+        /* const { publicaciones } = rows[0] || 0
         if (publicaciones >= MAX_LIMIT_POST) {
             return res.status(403).send({
                 status: 'Denied',
                 message: `El limite de publicaciones por usuario son ${MAX_LIMIT_POST}`,
             })
-        }
+        } */
 
         connection.release()
 
@@ -164,7 +169,6 @@ async function addNewProduct(req, res, next) {
             `SELECT max(id) AS lastIid FROM products`
         )
         console.log(row[0].lastIid)
-
 
         //Recuperar el total de productos que tiene el usuario
         const [totalProducts] = await connection.query(

@@ -21,11 +21,7 @@ const CATEGORY_VALID = [
 ]
 
 const MAX_IMAGE_WIDTH = 600
-<<<<<<< HEAD
-const MAX_LIMIT_POST = 1045
-=======
-//const MAX_LIMIT_POST = 10
->>>>>>> c697408d4648534b21571017f757a55118ede89d
+
 
 const PROJECT_MAIN_FOLDER_PATH = process.cwd() // ruta de nuestro proyecto
 const IMG_FOLDER_PATH = path.join(

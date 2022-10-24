@@ -870,7 +870,7 @@ const getProductByUserId = async (req, res, next) => {
 
         //si no existe el product devuelve un error
         if (products.length === 0) {
-            throw generateError(`Non hay productos`, 404)
+            throw generateError(`No hay productos`, 404)
         } else if (page > totalPages) {
             throw generateError(
                 `Not Found. No exite la pagina ${page}, van del 1 al ${totalPages}`,

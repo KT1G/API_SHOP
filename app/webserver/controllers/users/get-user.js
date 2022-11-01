@@ -1,7 +1,6 @@
 const { getConnection } = require('../../../db/db')
 
 async function getUser(req, res) {
-
     const userId = req.claims.userId
 
     let connection = null
@@ -32,9 +31,6 @@ async function getUser(req, res) {
 
         res.status(200).send(data)
     } catch (e) {
-        if (connection !== null) {
-            connection.release()
-        }
         res.status(500).send(e.message)
     } finally {
         if (connection !== null) {

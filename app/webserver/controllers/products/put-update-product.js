@@ -12,7 +12,12 @@ const { generateError, validateProducts } = require('../../../../helpers') //Var
 const IMG_VALID_FORMATS = ['jpeg', 'png']
 const MAX_IMAGE_WIDTH = 600
 const PROJECT_MAIN_FOLDER_PATH = process.cwd() // ruta de nuestro proyecto
-const IMG_FOLDER_PATH = path.join(PROJECT_MAIN_FOLDER_PATH,'public','uploads','products')
+const IMG_FOLDER_PATH = path.join(
+    PROJECT_MAIN_FOLDER_PATH,
+    'public',
+    'uploads',
+    'products'
+)
 
 const putUpdateProductInfo = async (req, res, next) => {
     //Recogemos los datos que nos llegan
@@ -79,7 +84,7 @@ const putUpdateProductInfo = async (req, res, next) => {
         //Si todo fue bien
         return res.status(200).send({
             status: 'Ok',
-            message: 'Producto actualizado correctamente',
+            message: 'Producto actualizado',
         })
     } catch (error) {
         next(error)
@@ -93,6 +98,7 @@ const putUpdateProductInfo = async (req, res, next) => {
 const putUpdateProductImage = async (req, res, next) => {
     const logUserId = req.claims.userId
     const id = req.params.id
+    const userId = req.params.userId
     const file = req.file
     let imageFileName = null
     let imageUploadPath = null
@@ -107,10 +113,14 @@ const putUpdateProductImage = async (req, res, next) => {
             image = sharp(file.buffer) //Recogemos los datos de la imagen
             metadata = await image.metadata() //Metadatos de la imagen para validar el formato
             if (!IMG_VALID_FORMATS.includes(metadata.format)) {
-                throw generateError(
+                return res.status(400).send({
+                    status: 'error',
+                    message: `El formato de la imagen debe ser: ${IMG_VALID_FORMATS}`,
+                })
+                /* throw generateError(
                     `Bad request. El formato de la imagen debe ser alguno de los siguientes: ${IMG_VALID_FORMATS}`,
                     400
-                )
+                ) */
             } else {
                 //Validar el tamaño de la imagen
                 if (metadata.width > MAX_IMAGE_WIDTH) {
@@ -121,10 +131,13 @@ const putUpdateProductImage = async (req, res, next) => {
                 imageFileName = `${v4()}.${metadata.format}`
 
                 //Ruta para guardar la imagen en el disco duro
-                imageUploadPath = path.join(IMG_FOLDER_PATH, logUserId.toString()) //ruta de la imagen
+                imageUploadPath = path.join(IMG_FOLDER_PATH, userId.toString()) //ruta de la imagen
             }
         } else {
-            throw generateError('Not Foun. No se ha subido ninguna imagen', 404)
+            throw generateError(
+                'Not Found. No se ha subido ninguna imagen',
+                404
+            )
         }
     } catch (error) {
         next(error)
@@ -148,7 +161,10 @@ const putUpdateProductImage = async (req, res, next) => {
         await image.toFile(path.join(imageUploadPath, imageFileName))
 
         //Si todo fue bien
-        res.status(200).send(`Imagen del producto con id: ${id} actualizada`)
+        res.status(200).send({
+            status: 'Ok',
+            message: 'Imagen actualizada',
+        })
     } catch (error) {
         next(error)
     } finally {

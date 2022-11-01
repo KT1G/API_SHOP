@@ -102,8 +102,8 @@ router.put(
 )
 // update product: image
 router.put(
-    '/products/update/image/:id',
-    checkAccountSession,
+    '/products/update/image/:id/:userId',
+    checkAccountSession, 
     upload.single('image'),
     putUpdateProductImage
 )

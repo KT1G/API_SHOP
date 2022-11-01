@@ -40,7 +40,7 @@ async function validateProduct(product) {
             .required(),
         price: Joi.number().required(),
         location: Joi.string().required(),
-        caption: Joi.string(),
+        caption: Joi.string().required(),
     })
 
     Joi.assert(product, schema)

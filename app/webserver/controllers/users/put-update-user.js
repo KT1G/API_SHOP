@@ -41,10 +41,22 @@ const putUpdateUserInfo = async (req, res, next) => {
     try {
         connection = await getConnection()
 
+        let query
+        // const query = 'UPDATE users SET name = ?, bio = ? WHERE id = ?' //Query para actualizar el usuario
+        // const values = [name, bio, logUserId] //Valores para la query
         const { name, bio } = payload //Recogemos en variables los datos que nos llegan
-        const query = 'UPDATE users SET name = ?, bio = ? WHERE id = ?' //Query para actualizar el usuario
-        const values = [name, bio, logUserId] //Valores para la query
-        const [result] = await connection.query(query, values)
+        /* if (bio.length > 0) {
+            query = 'UPDATE users SET name = ?, bio = ? WHERE id = ?' //Query para actualizar el usuario
+            values = [name, bio, logUserId] //Valores para la query
+        } else {
+            query = 'UPDATE users SET name = ? bio IS NULL WHERE id = ?' //Query para actualizar el usuario
+            values = [name, logUserId] //Valores para la query
+        } */
+        bio
+            ? (query = `UPDATE users SET name = '${name}', bio = '${bio}' WHERE id = ${logUserId}`)
+            : (query = `UPDATE users SET name = '${name}', bio ='' WHERE id = ${logUserId}`)
+
+        const [result] = await connection.query(query)
 
         //Comprobar si se ha actualizado el usuario
         if (result.affectedRows === 0) {
@@ -138,7 +150,10 @@ const putUpdateUserStatus = async (req, res, next) => {
                 400
             )
         }
-        res.status(200).send(`Usuario con id: ${userId} actualizado`)
+        res.status(200).send({
+            status: 'Ok',
+            message: `Usuario actualizado`,
+        })
     } catch (error) {
         next(error)
     } finally {
@@ -164,10 +179,14 @@ const putUpdateUserAvatar = async (req, res, next) => {
         image = sharp(file.buffer) //Recogemos los datos de la imagen
         metadata = await image.metadata() //Metadatos de la imagen para validar el formato
         if (!IMG_VALID_FORMATS.includes(metadata.format)) {
-            throw generateError(
-                `Bad request. El formato de la imagen debe ser alguno de los siguientes: ${IMG_VALID_FORMATS}`,
+            return res.status(400).send({
+                status: 'error',
+                message: `El formato de la imagen debe ser: ${IMG_VALID_FORMATS}`,
+            })
+            /* throw generateError(
+                `El formato de la imagen debe ser: ${IMG_VALID_FORMATS}`,
                 400
-            )
+            ) */
         } else {
             //Validar el tamaño de la imagen
             if (metadata.width > MAX_IMAGE_WIDTH) {
@@ -181,12 +200,13 @@ const putUpdateUserAvatar = async (req, res, next) => {
             imageUploadPath = path.join(IMG_FOLDER_PATH, userId.toString()) //ruta de la imagen
         }
     } catch (error) {
-        next(error)
+        return res.status(500).send(error.message)
     }
 
     //ACTUALIZAR EL AVATAR DEL USUARIO
     try {
         connection = await getConnection()
+
         const query = 'UPDATE users SET avatar = ? WHERE id = ?'
         const values = [imageFileName, userId]
         const [result] = await connection.query(query, values)

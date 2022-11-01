@@ -31,7 +31,7 @@ async function validateUsers(payload) {
         password: Joi.string().max(60),
         code: Joi.string().max(255),
         status: Joi.string().max(60).valid('active', 'admin'),
-        bio: Joi.string().max(255),
+        bio: Joi.string().min(0).max(255),
         page: Joi.number().integer().positive().min(1),
     })
 
@@ -65,7 +65,7 @@ async function validateProducts(payload) {
         maxValoration: Joi.number().integer().positive().max(5),
         buyer_id: Joi.number().integer().positive(),
         status: Joi.string().max(60).valid('bought'),
-        caption: Joi.string().max(60),
+        caption: Joi.string().max(255),
         page: Joi.number().integer().positive().min(1),
     })
 
